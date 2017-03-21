@@ -9,6 +9,7 @@ char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
 //char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
 
 char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
+int OPPISITESIDE[6] = {4,3,5,1,0,2};
 enum FACES{LEFT,BACK,UP,FRONT,RIGHT,DOWN};
 enum COLORS{GREEN, ORANGE, WHITE, RED, BLUE, YELLOW};
 
@@ -31,14 +32,22 @@ void move(int SIDE);	//DOES A MOVE CLOCKWISE
 void move2(int SIDE);	//DOES A MOVE TWICE
 void moveI(int SIDE);	//DOES A MOVE COUNTER CLOCKWISE
 void comands(std::string str); 
-void rotateSingeFace(int SIDE);
+void rotateSingleFace(int SIDE);
+void rotation(int SIDE);
 std::string replaceText(std::string str);
+
+void rotationX();
+void rotationY();
+void rotationZ();
 
 
 int main(){
 	//int CUBE [NUM_FACES][NUM_STICKERS];  //MY GOAL IS TO HAVE THIS BE AS FLEXIBLE AS POSSIBLE
 	initilize();
-	comands("F' R' D2 R' B' U' B' F L R B' U' R L2 U2 F B D' F L'"); //This appears to be working for any characters put in it
+	comands("L2 R U"); //This appears to be working for any characters put in it
+	rotationX();
+	rotationY();
+	rotationZ();//This appears to be working now I can might be able to consolidate this to a single function call
 	return 0;
 }
 
@@ -59,7 +68,66 @@ void move(int SIDE){//Clockwise Turn
 	CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]] = temp0;
 	CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]] = temp1;
 	std::cout<<std::endl<<FACE_NAME[SIDE]<<std::endl;
-	rotateSingeFace(SIDE);
+	rotateSingleFace(SIDE);
+	print();
+}
+
+void rotationX(){//GOOD
+	int temp[9];
+	for(int i = 0; i<NUM_STICKERS; i++){
+		temp[i]=CUBE[FRONT][i];
+
+		CUBE[FRONT][i]=CUBE[DOWN][i];
+		CUBE[DOWN][i]=CUBE[BACK][i];
+		CUBE[BACK][i]=CUBE[UP][i];
+		CUBE[UP][i]=temp[i];
+	}
+	rotateSingleFace(BACK);
+	rotateSingleFace(BACK);
+	rotateSingleFace(RIGHT);
+	rotateSingleFace(OPPISITESIDE[RIGHT]);//TO ROTATE IT CLOCKWISE
+	rotateSingleFace(OPPISITESIDE[RIGHT]);
+	rotateSingleFace(OPPISITESIDE[RIGHT]);
+	std::cout<<std::endl<<"Rotation X"<<std::endl;
+	print();
+}
+void rotationY(){//GOOD
+	int temp[9];
+	for(int i = 0; i<NUM_STICKERS; i++){
+		temp[i]=CUBE[FRONT][i];
+		CUBE[FRONT][i]=CUBE[RIGHT][i];
+		CUBE[RIGHT][i]=CUBE[BACK][i];
+		CUBE[BACK][i]=CUBE[LEFT][i];
+		CUBE[LEFT][i]=temp[i];
+	}
+	//rotateSingleFace(DOWN);
+	//rotateSingleFace(DOWN);
+	rotateSingleFace(UP);
+	rotateSingleFace(OPPISITESIDE[UP]);//TO ROTATE IT CLOCKWISE
+	//rotateSingleFace(OPPISITESIDE[UP]);
+	//rotateSingleFace(OPPISITESIDE[UP]);//I am going to figure out why this dosn't need a second one
+	std::cout<<std::endl<<"Rotation Y"<<std::endl;
+	print();
+}
+void rotationZ(){//GOOD
+	int temp[9];
+	for(int i = 0; i<NUM_STICKERS; i++){
+		temp[i]=CUBE[UP][i];
+		CUBE[UP][i]=CUBE[LEFT][i];
+		CUBE[LEFT][i]=CUBE[DOWN][i];
+		CUBE[DOWN][i]=CUBE[RIGHT][i];
+		CUBE[RIGHT][i]=temp[i];
+	}
+	rotateSingleFace(UP);
+	rotateSingleFace(LEFT);
+	rotateSingleFace(DOWN);
+	rotateSingleFace(RIGHT);
+
+	rotateSingleFace(FRONT); //This is the original side I am rotating
+	rotateSingleFace(OPPISITESIDE[FRONT]);
+	rotateSingleFace(OPPISITESIDE[FRONT]);
+	rotateSingleFace(OPPISITESIDE[FRONT]);
+	std::cout<<std::endl<<"Rotation Z"<<std::endl;
 	print();
 }
 
@@ -74,7 +142,7 @@ void move2(int SIDE){//2 Turns
  	move(SIDE);
 }
 
-void rotateSingeFace(int SIDE){ //I am seperating this out because rotating the cube will need this
+void rotateSingleFace(int SIDE){ //I am seperating this out because rotating the cube will need this
 	int temp = CUBE[SIDE][0]; 
 	CUBE[SIDE][0] = CUBE[SIDE][6];
 	CUBE[SIDE][6] = CUBE[SIDE][8];
