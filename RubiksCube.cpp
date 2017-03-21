@@ -5,22 +5,32 @@
 #define NUM_FACES 6
 #define NUM_STICKERS 9
 
-char _CHAR[6][2] = {"G","R","Y","O","B","W"}; 
+//char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
+char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
+
+
 char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
 enum FACES{LEFT,BACK,UP,FRONT,RIGHT,DOWN};
 enum COLORS{GREEN, ORANGE, WHITE, RED, BLUE, YELLOW};
 
-int ATMV[6][17] = {		{UP,BACK,DOWN,FRONT,	0,3,6,8,5,2,0,3,6,0,3,6,true	},
-						{UP,RIGHT,DOWN,LEFT,	0,1,2,2,5,8,6,7,8,0,3,6,false	},
-						{LEFT,FRONT,RIGHT,BACK,	0,1,2,0,1,2,0,1,2,0,1,2,false	},
-						{LEFT,DOWN,RIGHT,UP,	2,5,8,0,1,2,6,3,0,8,7,6,false	},
-						{UP,FRONT,DOWN,BACK,	2,5,8,2,5,8,2,5,8,6,3,0,true	},
-						{LEFT,BACK,RIGHT,FRONT,	6,7,8,6,7,8,6,7,8,6,7,8,false	}}; //THIS IS WHERE THE MAGIC HAPPEND
+/*int ATMV[6][16] = {		{UP,BACK,DOWN,FRONT,	0,3,6,8,5,2,0,3,6,0,3,6		},//LEFT
+						{UP,RIGHT,DOWN,LEFT,	0,1,2,2,5,8,6,7,8,0,3,6		},//BACK
+						{LEFT,FRONT,RIGHT,BACK,	0,1,2,0,1,2,0,1,2,0,1,2		},//UP
+						{LEFT,DOWN,RIGHT,UP,	2,5,8,0,1,2,6,3,0,8,7,6		},//FRONT
+						{UP,FRONT,DOWN,BACK,	2,5,8,2,5,8,2,5,8,6,3,0		},//RIGHT
+						{LEFT,BACK,RIGHT,FRONT,	6,7,8,6,7,8,6,7,8,6,7,8		}};//DOWN*/
+
+int ATMV[6][16] = {		{UP,BACK,DOWN,FRONT,	0,3,6,8,5,2,0,3,6,0,3,6		},//LEFT
+						{UP,RIGHT,DOWN,LEFT,	0,1,2,2,5,8,8,7,6,0,3,6		},//BACK
+						{LEFT,FRONT,RIGHT,BACK,	0,1,2,0,1,2,0,1,2,0,1,2		},//UP
+						{LEFT,DOWN,RIGHT,UP,	2,5,8,0,1,2,6,3,0,8,7,6		},//FRONT
+						{UP,FRONT,DOWN,BACK,	2,5,8,2,5,8,2,5,8,6,3,0		},//RIGHT
+						{LEFT,BACK,RIGHT,FRONT,	6,7,8,6,7,8,6,7,8,6,7,8		}};//DOWN
 
 int CUBE [NUM_FACES][NUM_STICKERS];
 
-char validChar[3*6][3] = {"L","Li","L2","B","Bi","B2","U","Ui","U2","F","Fi","F2","R","Ri","R2","D","Di","D2"};
-
+char VALID_TWO_CHAR_COMMANDS[12][3] = {"Li","L2","Bi","B2","Ui","U2","Fi","F2","Ri","R2","Di","D2"};
+char VALID_ONE_CHAR_COMMANDS[6][2] = {"L","B","U","F","R","D"};
 
 //METHODS
 void initilize();		//INITILIZES THE CUBE
@@ -29,18 +39,73 @@ void move(int SIDE);	//DOES A MOVE CLOCKWISE
 void move2(int SIDE);	//DOES A MOVE TWICE
 void moveI(int SIDE);	//DOES A MOVE COUNTER CLOCKWISE
 void comands(std::string str); 
+void rotateSingeFace(int SIDE);
 std::string replaceText(std::string str);
 
 
 int main(){
 	//int CUBE [NUM_FACES][NUM_STICKERS];  //MY GOAL IS TO HAVE THIS BE AS FLEXIBLE AS POSSIBLE
 	initilize();
-	comands("R U D2"); //This appears to be working for single characters
+	comands("D L D' U2 F L D2 L' D2 R"); //This appears to be working for single characters
+	
 	return 0;
 }
 
-char strAlphas[12][3] = {"Li","L2","Bi","B2","Ui","U2","Fi","F2","Ri","R2","Di","D2"};
-char strBetas[6][2] = {"L","B","U","F","R","D"};
+void moveI(int SIDE){//Counter Clockwise Trun
+	move(SIDE);
+ 	move(SIDE);
+ 	move(SIDE);
+}
+
+void move2(int SIDE){//2 Turns
+ 	move(SIDE);
+ 	move(SIDE);
+ }
+
+void move(int SIDE){//Clockwise Turn
+	std::cout<<FACE_NAME[SIDE]<<std::endl;
+	int temp = CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]];
+	int temp0 = CUBE[ATMV[SIDE][0]][ATMV[SIDE][5]];
+	int temp1 = CUBE[ATMV[SIDE][0]][ATMV[SIDE][6]];
+	CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]] = CUBE[ATMV[SIDE][1]][ATMV[SIDE][7]];
+	CUBE[ATMV[SIDE][0]][ATMV[SIDE][5]] = CUBE[ATMV[SIDE][1]][ATMV[SIDE][8]];
+	CUBE[ATMV[SIDE][0]][ATMV[SIDE][6]] = CUBE[ATMV[SIDE][1]][ATMV[SIDE][9]];
+
+	CUBE[ATMV[SIDE][1]][ATMV[SIDE][7]] = CUBE[ATMV[SIDE][2]][ATMV[SIDE][10]];
+	CUBE[ATMV[SIDE][1]][ATMV[SIDE][8]] = CUBE[ATMV[SIDE][2]][ATMV[SIDE][11]];
+	CUBE[ATMV[SIDE][1]][ATMV[SIDE][9]] = CUBE[ATMV[SIDE][2]][ATMV[SIDE][12]];
+
+	CUBE[ATMV[SIDE][2]][ATMV[SIDE][10]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]];
+	CUBE[ATMV[SIDE][2]][ATMV[SIDE][11]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]];
+	CUBE[ATMV[SIDE][2]][ATMV[SIDE][12]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]];
+
+	//if (ATMV[SIDE][16]){//I need to add this because LEFT and RIGHT are not congruent
+	CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]] = temp;
+	CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]] = temp0;
+	CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]] = temp1;
+	/*}
+	else{
+		CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]] = temp1;
+		CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]] = temp0;
+		CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]] = temp;	
+	}*/
+	rotateSingeFace(SIDE);
+	print();
+	std::cout<<std::endl;
+}
+
+void rotateSingeFace(int SIDE){ //I am seperating this out because rotating the cube will need this
+	int temp = CUBE[SIDE][0]; 
+	CUBE[SIDE][0] = CUBE[SIDE][6];
+	CUBE[SIDE][6] = CUBE[SIDE][8];
+	CUBE[SIDE][8] = CUBE[SIDE][2];
+	CUBE[SIDE][2] = temp;
+	temp = CUBE[SIDE][1];
+	CUBE[SIDE][1] = CUBE[SIDE][3];
+	CUBE[SIDE][3] = CUBE[SIDE][7];
+	CUBE[SIDE][7] = CUBE[SIDE][5];
+	CUBE[SIDE][5] = temp;
+}
 
 void comands(std::string str){ //This preforms all moves sent to the cube 
 	str = replaceText(str);
@@ -52,7 +117,7 @@ void comands(std::string str){ //This preforms all moves sent to the cube
 		strAlpha = str.substr(strLen,2);
 		strBeta = str.substr(strLen,1);
 		for (int i = 0; i <6*2; i++){
-			if(strAlpha == strAlphas[i]){
+			if(strAlpha == VALID_TWO_CHAR_COMMANDS[i]){
 				if(i%2==0){
 					moveI(i/2);
 					strLen++;
@@ -66,7 +131,7 @@ void comands(std::string str){ //This preforms all moves sent to the cube
 		strAlpha = str.substr(strLen,2); 
 		strBeta = str.substr(strLen,1);
 		for (int i = 0; i<6; i++){
-			if (strBeta == strBetas[i]){
+			if (strBeta == VALID_ONE_CHAR_COMMANDS[i]){
 				move(i); 
 			}
 		}
@@ -79,59 +144,6 @@ std::string replaceText(std::string str){
 	std::replace( str.begin(), str.end(), '\'', 'i');
 	return str;
 }//This gets rid of spaces and replaces ' with i (this stands of prime)
-
-
-
-void moveI(int SIDE){
-	move(SIDE);
- 	move(SIDE);
- 	move(SIDE);
-}
-
-void move2(int SIDE){
- 	move(SIDE);
- 	move(SIDE);
- }
-
-void move(int SIDE){
-	std::cout<<FACE_NAME[SIDE]<<std::endl;
-	int temp = CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]];
-	int temp0 = CUBE[ATMV[SIDE][0]][ATMV[SIDE][5]];
-	int temp1 = CUBE[ATMV[SIDE][0]][ATMV[SIDE][6]];
-	CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]] = CUBE[ATMV[SIDE][1]][ATMV[SIDE][7]];
-	CUBE[ATMV[SIDE][0]][ATMV[SIDE][5]] = CUBE[ATMV[SIDE][1]][ATMV[SIDE][8]];
-	CUBE[ATMV[SIDE][0]][ATMV[SIDE][6]] = CUBE[ATMV[SIDE][1]][ATMV[SIDE][9]];
-	CUBE[ATMV[SIDE][1]][ATMV[SIDE][7]] = CUBE[ATMV[SIDE][2]][ATMV[SIDE][10]];
-	CUBE[ATMV[SIDE][1]][ATMV[SIDE][8]] = CUBE[ATMV[SIDE][2]][ATMV[SIDE][11]];
-	CUBE[ATMV[SIDE][1]][ATMV[SIDE][9]] = CUBE[ATMV[SIDE][2]][ATMV[SIDE][12]];
-	CUBE[ATMV[SIDE][2]][ATMV[SIDE][10]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]];
-	CUBE[ATMV[SIDE][2]][ATMV[SIDE][11]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]];
-	CUBE[ATMV[SIDE][2]][ATMV[SIDE][12]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]];
-
-	if (ATMV[SIDE][16]){//I need to add this because LEFT and RIGHT are not congruent
-		CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]] = temp;
-		CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]] = temp0;
-		CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]] = temp1;
-	}
-	else{
-		CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]] = temp1;
-		CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]] = temp0;
-		CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]] = temp;	
-	}
-
-	temp = CUBE[SIDE][0]; //This rotates the side it's self
-	CUBE[SIDE][0] = CUBE[SIDE][6];
-	CUBE[SIDE][6] = CUBE[SIDE][8];
-	CUBE[SIDE][8] = CUBE[SIDE][2];
-	CUBE[SIDE][2] = temp;
-	temp = CUBE[SIDE][1];
-	CUBE[SIDE][1] = CUBE[SIDE][3];
-	CUBE[SIDE][3] = CUBE[SIDE][7];
-	CUBE[SIDE][7] = CUBE[SIDE][5];
-	CUBE[SIDE][5] = temp;
-	print();
-	std::cout<<std::endl;
-}
 
 void print(){
 	
