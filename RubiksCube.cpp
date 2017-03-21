@@ -1,355 +1,231 @@
 #include <iostream>
+#include <string>
+#include <algorithm>
+
 #define NUM_FACES 6
 #define NUM_STICKERS 9
 
-char PRINT_COLOR[6][2] = {"G","R","Y","O","B","W"};
+char _CHAR[6][2] = {"G","R","Y","O","B","W"}; 
 char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
 enum FACES{LEFT,BACK,UP,FRONT,RIGHT,DOWN};
 enum COLORS{GREEN, ORANGE, WHITE, RED, BLUE, YELLOW};
 
+int ATMV[6][17] = {{UP,BACK,DOWN,FRONT,	0,3,6,8,5,2,0,3,6,0,3,6,true},
+						{UP,RIGHT,DOWN,LEFT,	0,1,2,2,5,8,6,7,8,0,3,6,false},
+						{LEFT,FRONT,RIGHT,BACK,	0,1,2,0,1,2,0,1,2,0,1,2,false},
+						{LEFT,DOWN,RIGHT,UP,	2,5,8,0,1,2,6,3,0,8,7,6,false},
+						{UP,FRONT,DOWN,BACK,	2,5,8,2,5,8,2,5,8,6,3,0,true},
+						{LEFT,BACK,RIGHT,FRONT,	6,7,8,6,7,8,6,7,8,6,7,8,false}}; //THIS IS WHERE THE MAGIC HAPPEND
 
-int AUTO_MOVE[6][18] = {{LEFT,UP,BACK,DOWN,FRONT,0,3,6,8,5,2,0,3,6,0,3,6,true},
-						{BACK,UP,RIGHT,DOWN,LEFT,0,1,2,2,5,8,6,7,8,0,3,6,false},
-						{UP,LEFT,FRONT,RIGHT,BACK,0,1,2,0,1,2,0,1,2,0,1,2,false},
-						{FRONT,LEFT,DOWN,RIGHT,UP,2,5,8,0,1,2,6,3,0,8,7,6,false},
-						{RIGHT,UP,FRONT,DOWN,BACK,2,5,8,2,5,8,2,5,8,6,3,0,true},
-						{DOWN,LEFT,BACK,RIGHT,FRONT,6,7,8,6,7,8,6,7,8,6,7,8,false}};
+int CUBE [NUM_FACES][NUM_STICKERS];
+
+char validChar[3*6][3] = {"L","Li","L2","B","Bi","B2","U","Ui","U2","F","Fi","F2","R","Ri","R2","D","Di","D2"};
 
 
+//METHODS
+void initilize();		//INITILIZES THE CUBE
+void print(); 			//PRINTS THE CUBE
+void move(int SIDE);	//DOES A MOVE CLOCKWISE
+void move2(int SIDE);	//DOES A MOVE TWICE
+void moveI(int SIDE);	//DOES A MOVE COUNTER CLOCKWISE
+void comands(std::string str); 
+std::string replaceText(std::string str);
 
-void spinX(int (&cube)[NUM_FACES][NUM_STICKERS]);
-
-void print(int (&cube)[NUM_FACES][NUM_STICKERS]); //This prints out the cube for me in the order of Front,Back,Up,Down,Left,Right ~ it dosn't really matter what it is mapped to 
-void initilize(int (&cube)[NUM_FACES][NUM_STICKERS]);
-
-void moveRIGHT(int (&cube)[NUM_FACES][NUM_STICKERS]);
-void moveLEFT(int (&cube)[NUM_FACES][NUM_STICKERS]);
-
-void moveUP(int (&cube)[NUM_FACES][NUM_STICKERS]);
-void moveDOWN(int (&cube)[NUM_FACES][NUM_STICKERS]);
-
-void moveFRONT(int (&cube)[NUM_FACES][NUM_STICKERS]);
-void moveBACK(int (&cube)[NUM_FACES][NUM_STICKERS]);
-void move(	int S0,
-			int S1, int S1V0, int S1V1, int S1V2,
-			int S2, int S2V0, int S2V1, int S2V2,
-			int S3, int S3V0, int S3V1, int S3V2,
-			int S4, int S4V0, int S4V1, int S4V2,
-			int (&cube)[NUM_FACES][NUM_STICKERS]);
-
-void move(int SIDE,int (&cube)[NUM_FACES][NUM_STICKERS]);
-void move2(int SIDE,int (&cube)[NUM_FACES][NUM_STICKERS]);
-void moveI(int SIDE,int (&cube)[NUM_FACES][NUM_STICKERS]);
 
 int main(){
-
-	int cube [NUM_FACES][NUM_STICKERS];  //MY GOAL IS TO HAVE THIS BE AS FLEXIBLE AS POSSIBLE
-	initilize(cube);
-
+	//int CUBE [NUM_FACES][NUM_STICKERS];  //MY GOAL IS TO HAVE THIS BE AS FLEXIBLE AS POSSIBLE
+	initilize();
+	comands("L2 D' R2 D R' B U F' L' F' R D' L F2 U' F' R' F2 R2 F L F2 D2 B L2'");
 	
-
-	
-	move(FRONT,cube);
-	moveI(LEFT,cube);
-	//move2(LEFT,cube);
-
-	//move(FRONT,cube);
-	//move2(LEFT,cube);
-
-
-	print(cube); 
-	std::cout<<std::endl;
-	print(cube);
+	return 0;
 }
 
-void moveI(int SIDE,int (&cube)[NUM_FACES][NUM_STICKERS]){
-	move(SIDE,cube);
- 	move(SIDE,cube);
- 	move(SIDE,cube);
+
+
+char strAlphas[12][3] = {"Li","L2","Bi","B2","Ui","U2","Fi","F2","Ri","R2","Di","D2"};
+char strBetas[6][2] = {"L","B","U","F","D"};
+
+
+
+void comands(std::string str){ 
+
+	str = replaceText(str);
+
+	std::cout<<"ORIGINAL TEXT:\t";//<<std::endl;
+	std::cout<<str<<std::endl;
+
+	int strLen = 0;
+	while(strLen<=str.length()-1){
+		bool isValidChar = false;
+		for (int i = 0; i < 3*6; i++)
+			if(str.substr(strLen,2) == validChar[i]){ //This looks for single characters
+				isValidChar = true;
+				//std::cout<<str.substr(strLen,2)<<std::endl;
+				strLen++;
+				std::string strAlpha = str.substr(strLen,2);
+
+				for (int i = 0; i<6*2; i++){
+					if(i%2 == true){
+						if(strAlpha==strAlphas[i]){
+							move2(i);
+						}
+					}
+				 	else if (i%2 == false){
+						if(strAlpha==strAlphas[i]){
+							moveI(i);
+						}
+					}
+				}//This is what I want to work on*/
+
+				if(strAlpha=="L2")
+					move2(LEFT);			
+				else if(strAlpha=="B2")
+					move2(BACK);
+				else if(strAlpha=="U2")
+					move2(UP);
+				else if(strAlpha=="F2")
+					move2(FRONT);
+				else if(strAlpha=="R2")
+					move2(RIGHT);
+				else if(strAlpha=="D2")
+					move2(DOWN);
+				else if(strAlpha=="Li")
+					moveI(LEFT);			
+				else if(strAlpha=="Bi")
+					moveI(BACK);
+				else if(strAlpha=="Ui")
+					moveI(UP);
+				else if(strAlpha=="Fi")
+					moveI(FRONT);
+				else if(strAlpha=="Ri")
+					moveI(RIGHT);
+				else if(strAlpha=="Di")
+					moveI(DOWN);
+				else{
+					std::cout<<"FAILA"<<std::endl;
+				}
+			}
+		if(isValidChar == false){ //This looks for double characters
+			std::string strBeta = str.substr(strLen,1);
+			//std::cout<<str.substr(strLen,1)<<std::endl;
+
+			if(strBeta=="L")
+				move(LEFT);			
+			else if(strBeta=="B")
+				move(BACK);
+			else if(strBeta=="U")
+				move(UP);
+			else if(strBeta=="F")
+				move(FRONT);
+			else if(strBeta=="R")
+				move(RIGHT);
+			else if(strBeta=="D")
+				move(DOWN);
+			else{
+				std::cout<<"FAILB"<<std::endl;
+			}
+
+		}
+			//std::string x = str.substr(strLen,1);
+			//std::cout<<x<<"\tXXX"<<std::endl;
+
+		strLen++;
+	}
+
+
+	//OK so now I need to do a switch statemnt to see what the letters where
 }
 
-void move2(int SIDE,int (&cube)[NUM_FACES][NUM_STICKERS]){
- 	move(SIDE,cube);
- 	move(SIDE,cube);
+std::string replaceText(std::string str){
+	str.erase(remove(str.begin(),str.end(),' '),str.end());
+	std::replace( str.begin(), str.end(), '\'', 'i');
+	return str;
+}//This gets rid of spaces and replaces ' with i (this stands of prime)
+
+
+
+void moveI(int SIDE){
+	move(SIDE);
+ 	move(SIDE);
+ 	move(SIDE);
+}
+
+void move2(int SIDE){
+ 	move(SIDE);
+ 	move(SIDE);
  }
 
-void move(int SIDE,int (&cube)[NUM_FACES][NUM_STICKERS]){
-	int temp = cube[AUTO_MOVE[SIDE][1]][AUTO_MOVE[SIDE][5]];
-	int temp0 = cube[AUTO_MOVE[SIDE][1]][AUTO_MOVE[SIDE][6]];
-	int temp1 = cube[AUTO_MOVE[SIDE][1]][AUTO_MOVE[SIDE][7]];
-	cube[AUTO_MOVE[SIDE][1]][AUTO_MOVE[SIDE][5]] = cube[AUTO_MOVE[SIDE][2]][AUTO_MOVE[SIDE][8]];
-	cube[AUTO_MOVE[SIDE][1]][AUTO_MOVE[SIDE][6]] = cube[AUTO_MOVE[SIDE][2]][AUTO_MOVE[SIDE][9]];
-	cube[AUTO_MOVE[SIDE][1]][AUTO_MOVE[SIDE][7]] = cube[AUTO_MOVE[SIDE][2]][AUTO_MOVE[SIDE][10]];
-	cube[AUTO_MOVE[SIDE][2]][AUTO_MOVE[SIDE][8]] = cube[AUTO_MOVE[SIDE][3]][AUTO_MOVE[SIDE][11]];
-	cube[AUTO_MOVE[SIDE][2]][AUTO_MOVE[SIDE][9]] = cube[AUTO_MOVE[SIDE][3]][AUTO_MOVE[SIDE][12]];
-	cube[AUTO_MOVE[SIDE][2]][AUTO_MOVE[SIDE][10]] = cube[AUTO_MOVE[SIDE][3]][AUTO_MOVE[SIDE][13]];
-	cube[AUTO_MOVE[SIDE][3]][AUTO_MOVE[SIDE][11]] = cube[AUTO_MOVE[SIDE][4]][AUTO_MOVE[SIDE][14]];
-	cube[AUTO_MOVE[SIDE][3]][AUTO_MOVE[SIDE][12]] = cube[AUTO_MOVE[SIDE][4]][AUTO_MOVE[SIDE][15]];
-	cube[AUTO_MOVE[SIDE][3]][AUTO_MOVE[SIDE][13]] = cube[AUTO_MOVE[SIDE][4]][AUTO_MOVE[SIDE][16]];
+void move(int SIDE){
+	std::cout<<FACE_NAME[SIDE]<<std::endl;
+	int temp = CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]];
+	int temp0 = CUBE[ATMV[SIDE][0]][ATMV[SIDE][5]];
+	int temp1 = CUBE[ATMV[SIDE][0]][ATMV[SIDE][6]];
+	CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]] = CUBE[ATMV[SIDE][1]][ATMV[SIDE][7]];
+	CUBE[ATMV[SIDE][0]][ATMV[SIDE][5]] = CUBE[ATMV[SIDE][1]][ATMV[SIDE][8]];
+	CUBE[ATMV[SIDE][0]][ATMV[SIDE][6]] = CUBE[ATMV[SIDE][1]][ATMV[SIDE][9]];
+	CUBE[ATMV[SIDE][1]][ATMV[SIDE][7]] = CUBE[ATMV[SIDE][2]][ATMV[SIDE][10]];
+	CUBE[ATMV[SIDE][1]][ATMV[SIDE][8]] = CUBE[ATMV[SIDE][2]][ATMV[SIDE][11]];
+	CUBE[ATMV[SIDE][1]][ATMV[SIDE][9]] = CUBE[ATMV[SIDE][2]][ATMV[SIDE][12]];
+	CUBE[ATMV[SIDE][2]][ATMV[SIDE][10]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]];
+	CUBE[ATMV[SIDE][2]][ATMV[SIDE][11]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]];
+	CUBE[ATMV[SIDE][2]][ATMV[SIDE][12]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]];
 
-	if (AUTO_MOVE[SIDE][17]){
-		cube[AUTO_MOVE[SIDE][4]][AUTO_MOVE[SIDE][14]] = temp;
-		cube[AUTO_MOVE[SIDE][4]][AUTO_MOVE[SIDE][15]] = temp0;
-		cube[AUTO_MOVE[SIDE][4]][AUTO_MOVE[SIDE][16]] = temp1;
+	if (ATMV[SIDE][16]){//I need to add this because LEFT and RIGHT are not congruent
+		CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]] = temp;
+		CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]] = temp0;
+		CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]] = temp1;
 	}
 	else{
-		cube[AUTO_MOVE[SIDE][4]][AUTO_MOVE[SIDE][14]] = temp1;
-		cube[AUTO_MOVE[SIDE][4]][AUTO_MOVE[SIDE][15]] = temp0;
-		cube[AUTO_MOVE[SIDE][4]][AUTO_MOVE[SIDE][16]] = temp;	
+		CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]] = temp1;
+		CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]] = temp0;
+		CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]] = temp;	
 	}
 
-	temp = cube[AUTO_MOVE[SIDE][0]][0]; //I will also have to switch the roatation of the face it's self
-	cube[AUTO_MOVE[SIDE][0]][0] = cube[AUTO_MOVE[SIDE][0]][6];
-	cube[AUTO_MOVE[SIDE][0]][6] = cube[AUTO_MOVE[SIDE][0]][8];
-	cube[AUTO_MOVE[SIDE][0]][8] = cube[AUTO_MOVE[SIDE][0]][2];
-	cube[AUTO_MOVE[SIDE][0]][2] = temp;
-	temp = cube[AUTO_MOVE[SIDE][0]][1];
-	cube[AUTO_MOVE[SIDE][0]][1] = cube[AUTO_MOVE[SIDE][0]][3];
-	cube[AUTO_MOVE[SIDE][0]][3] = cube[AUTO_MOVE[SIDE][0]][7];
-	cube[AUTO_MOVE[SIDE][0]][7] = cube[AUTO_MOVE[SIDE][0]][5];
-	cube[AUTO_MOVE[SIDE][0]][5] = temp;
+	temp = CUBE[SIDE][0]; //This rotates the side it's self
+	CUBE[SIDE][0] = CUBE[SIDE][6];
+	CUBE[SIDE][6] = CUBE[SIDE][8];
+	CUBE[SIDE][8] = CUBE[SIDE][2];
+	CUBE[SIDE][2] = temp;
+	temp = CUBE[SIDE][1];
+	CUBE[SIDE][1] = CUBE[SIDE][3];
+	CUBE[SIDE][3] = CUBE[SIDE][7];
+	CUBE[SIDE][7] = CUBE[SIDE][5];
+	CUBE[SIDE][5] = temp;
+	print();
+	std::cout<<std::endl;
 }
 
-void moveLEFT(int (&cube)[NUM_FACES][NUM_STICKERS]){
-	int temp = cube[UP][0];
-	int temp0 = cube[UP][3];
-	int temp1 = cube[UP][6];
-	cube[UP][0] = cube[BACK][8];
-	cube[UP][3] = cube[BACK][5];
-	cube[UP][6] = cube[BACK][2];
-	cube[BACK][8] = cube[DOWN][0];
-	cube[BACK][5] = cube[DOWN][3];
-	cube[BACK][2] = cube[DOWN][6];
-	cube[DOWN][0] = cube[FRONT][0];
-	cube[DOWN][3] = cube[FRONT][3];
-	cube[DOWN][6] = cube[FRONT][6];
+void print(){
 
-	cube[FRONT][0] = temp1;//0
-	cube[FRONT][3] = temp0;//3
-	cube[FRONT][6] = temp;//6
 
-	temp = cube[LEFT][0]; //I will also have to switch the roatation of the face it's self
-	cube[LEFT][0] = cube[LEFT][6];
-	cube[LEFT][6] = cube[LEFT][8];
-	cube[LEFT][8] = cube[LEFT][2];
-	cube[LEFT][2] = temp;
-	temp = cube[LEFT][1];
-	cube[LEFT][1] = cube[LEFT][3];
-	cube[LEFT][3] = cube[LEFT][7];
-	cube[LEFT][7] = cube[LEFT][5];
-	cube[LEFT][5] = temp;
+		std::cout<<"\t"<<_CHAR[CUBE[UP][0]] << _CHAR[CUBE[UP][1]] << _CHAR[CUBE[UP][2]]<<std::endl;
+		std::cout<<"\t"<<_CHAR[CUBE[UP][3]] << _CHAR[CUBE[UP][4]] << _CHAR[CUBE[UP][5]]<<std::endl;
+		std::cout<<"\t"<<_CHAR[CUBE[UP][6]] << _CHAR[CUBE[UP][7]] << _CHAR[CUBE[UP][8]]<<std::endl<<std::endl;
+
+		std::cout<<_CHAR[CUBE[LEFT][0]] << _CHAR[CUBE[LEFT][1]] << _CHAR[CUBE[LEFT][2]] <<"\t";
+		std::cout<<_CHAR[CUBE[FRONT][0]] << _CHAR[CUBE[FRONT][1]] << _CHAR[CUBE[FRONT][2]] <<"\t";
+		std::cout<<_CHAR[CUBE[RIGHT][0]] << _CHAR[CUBE[RIGHT][1]] << _CHAR[CUBE[RIGHT][2]] <<"\t";
+		std::cout<<_CHAR[CUBE[BACK][0]] << _CHAR[CUBE[BACK][1]] << _CHAR[CUBE[BACK][2]]<<std::endl;
+
+		std::cout<<_CHAR[CUBE[LEFT][3]] << _CHAR[CUBE[LEFT][4]] << _CHAR[CUBE[LEFT][5]] <<"\t";
+		std::cout<<_CHAR[CUBE[FRONT][3]] << _CHAR[CUBE[FRONT][4]] << _CHAR[CUBE[FRONT][5]] <<"\t";
+		std::cout<<_CHAR[CUBE[RIGHT][3]] << _CHAR[CUBE[RIGHT][4]] << _CHAR[CUBE[RIGHT][5]] <<"\t";
+		std::cout<<_CHAR[CUBE[BACK][3]] << _CHAR[CUBE[BACK][4]] << _CHAR[CUBE[BACK][5]]<<std::endl;
+
+		std::cout<<_CHAR[CUBE[LEFT][6]] << _CHAR[CUBE[LEFT][7]] << _CHAR[CUBE[LEFT][8]] <<"\t";
+		std::cout<<_CHAR[CUBE[FRONT][6]] << _CHAR[CUBE[FRONT][7]] << _CHAR[CUBE[FRONT][8]] <<"\t";
+		std::cout<<_CHAR[CUBE[RIGHT][6]] << _CHAR[CUBE[RIGHT][7]] << _CHAR[CUBE[RIGHT][8]] <<"\t";
+		std::cout<<_CHAR[CUBE[BACK][6]] << _CHAR[CUBE[BACK][7]] << _CHAR[CUBE[BACK][8]]<<std::endl<<std::endl;
+
+		std::cout<<"\t"<<_CHAR[CUBE[DOWN][0]] << _CHAR[CUBE[DOWN][1]] << _CHAR[CUBE[DOWN][2]]<<std::endl;
+		std::cout<<"\t"<<_CHAR[CUBE[DOWN][3]] << _CHAR[CUBE[DOWN][4]] << _CHAR[CUBE[DOWN][5]]<<std::endl;
+		std::cout<<"\t"<<_CHAR[CUBE[DOWN][6]] << _CHAR[CUBE[DOWN][7]] << _CHAR[CUBE[DOWN][8]]<<std::endl;
 }
 
-
-void moveBACK(int (&cube)[NUM_FACES][NUM_STICKERS]){
-	int temp = cube[UP][0];
-	int temp0 = cube[UP][1];
-	int temp1 = cube[UP][2];
-	cube[UP][0] = cube[RIGHT][2];
-	cube[UP][1] = cube[RIGHT][5];
-	cube[UP][2] = cube[RIGHT][8];
-	cube[RIGHT][2] = cube[DOWN][6];
-	cube[RIGHT][5] = cube[DOWN][7];
-	cube[RIGHT][8] = cube[DOWN][8];
-	cube[DOWN][6] = cube[LEFT][0];
-	cube[DOWN][7] = cube[LEFT][3];
-	cube[DOWN][8] = cube[LEFT][6];
-
-	cube[LEFT][0] = temp;
-	cube[LEFT][3] = temp0;
-	cube[LEFT][6] = temp1;
-
-	temp = cube[BACK][0]; //I will also have to switch the roatation of the face it's self
-	cube[BACK][0] = cube[BACK][6];
-	cube[BACK][6] = cube[BACK][8];
-	cube[BACK][8] = cube[BACK][2];
-	cube[BACK][2] = temp;
-	temp = cube[BACK][1];
-	cube[BACK][1] = cube[BACK][3];
-	cube[BACK][3] = cube[BACK][7];
-	cube[BACK][7] = cube[BACK][5];
-	cube[BACK][5] = temp;
-}
-
-void moveUP(int (&cube)[NUM_FACES][NUM_STICKERS]){
-	int temp = cube[LEFT][0];
-	int temp0 = cube[LEFT][1];
-	int temp1 = cube[LEFT][2];
-	cube[LEFT][0] = cube[FRONT][0];
-	cube[LEFT][1] = cube[FRONT][1];
-	cube[LEFT][2] = cube[FRONT][2];
-	cube[FRONT][0] = cube[RIGHT][0];
-	cube[FRONT][1] = cube[RIGHT][1];
-	cube[FRONT][2] = cube[RIGHT][2];
-	cube[RIGHT][0] = cube[BACK][0];
-	cube[RIGHT][1] = cube[BACK][1];
-	cube[RIGHT][2] = cube[BACK][2];
-
-	cube[BACK][0] = temp;
-	cube[BACK][1] = temp0;
-	cube[BACK][2] = temp1;
-
-	temp = cube[UP][0];//I will also have to switch the roatation of the face it's self
-	cube[UP][0] = cube[UP][6];
-	cube[UP][6] = cube[UP][8];
-	cube[UP][8] = cube[UP][2];
-	cube[UP][2] = temp;
-	temp = cube[UP][1];
-	cube[UP][1] = cube[UP][3];
-	cube[UP][3] = cube[UP][7];
-	cube[UP][7] = cube[UP][5];
-	cube[UP][5] = temp;
-}
-
-void moveFRONT(int (&cube)[NUM_FACES][NUM_STICKERS]){
-	int temp = cube[LEFT][2];
-	int temp0 = cube[LEFT][5];
-	int temp1 = cube[LEFT][8];
-	cube[LEFT][2] = cube[DOWN][0];
-	cube[LEFT][5] = cube[DOWN][1];
-	cube[LEFT][8] = cube[DOWN][2];
-	cube[DOWN][0] = cube[RIGHT][6];
-	cube[DOWN][1] = cube[RIGHT][3];
-	cube[DOWN][2] = cube[RIGHT][0];
-	cube[RIGHT][6] = cube[UP][8];
-	cube[RIGHT][3] = cube[UP][7];
-	cube[RIGHT][0] = cube[UP][6];
-
-	cube[UP][8] = temp;
-	cube[UP][7] = temp0;
-	cube[UP][6] = temp1;
-
-	temp = cube[FRONT][0]; //I will also have to switch the roatation of the face it's self
-	cube[FRONT][0] = cube[FRONT][6];
-	cube[FRONT][6] = cube[FRONT][8];
-	cube[FRONT][8] = cube[FRONT][2];
-	cube[FRONT][2] = temp;
-	temp = cube[FRONT][1];
-	cube[FRONT][1] = cube[FRONT][3];
-	cube[FRONT][3] = cube[FRONT][7];
-	cube[FRONT][7] = cube[FRONT][5];
-	cube[FRONT][5] = temp;
-}
-
-void moveRIGHT(int (&cube)[NUM_FACES][NUM_STICKERS]){
-	int temp = cube[UP][2];
-	int temp0 = cube[UP][5];
-	int temp1 = cube[UP][8];
-	cube[UP][2] = cube[FRONT][2];
-	cube[UP][5] = cube[FRONT][5];
-	cube[UP][8] = cube[FRONT][8];
-	cube[FRONT][2] = cube[DOWN][2];
-	cube[FRONT][5] = cube[DOWN][5];
-	cube[FRONT][8] = cube[DOWN][8];
-	cube[DOWN][2] = cube[BACK][6];
-	cube[DOWN][5] = cube[BACK][3];
-	cube[DOWN][8] = cube[BACK][0];
-
-	cube[BACK][6] = temp1;
-	cube[BACK][3] = temp0;
-	cube[BACK][0] = temp;
-
-	temp = cube[RIGHT][0]; //I will also have to switch the roatation of the face it's self
-	cube[RIGHT][0] = cube[RIGHT][6];
-	cube[RIGHT][6] = cube[RIGHT][8];
-	cube[RIGHT][8] = cube[RIGHT][2];
-	cube[RIGHT][2] = temp;
-	temp = cube[RIGHT][1];
-	cube[RIGHT][1] = cube[RIGHT][3];
-	cube[RIGHT][3] = cube[RIGHT][7];
-	cube[RIGHT][7] = cube[RIGHT][5];
-	cube[RIGHT][5] = temp;
-}
-
-void moveDOWN(int (&cube)[NUM_FACES][NUM_STICKERS]){
-	int temp = cube[LEFT][6];
-	int temp0 = cube[LEFT][7];
-	int temp1 = cube[LEFT][8];
-	cube[LEFT][6] = cube[BACK][6];
-	cube[LEFT][7] = cube[BACK][7];
-	cube[LEFT][8] = cube[BACK][8];
-	cube[BACK][6] = cube[RIGHT][6];
-	cube[BACK][7] = cube[RIGHT][7];
-	cube[BACK][8] = cube[RIGHT][8];
-	cube[RIGHT][6] = cube[FRONT][6];
-	cube[RIGHT][7] = cube[FRONT][7];
-	cube[RIGHT][8] = cube[FRONT][8];
-
-	cube[FRONT][6] = temp;
-	cube[FRONT][7] = temp0;
-	cube[FRONT][8] = temp1;
-
-	temp = cube[DOWN][0]; //I will also have to switch the roatation of the face it's self
-	cube[DOWN][0] = cube[DOWN][6];
-	cube[DOWN][6] = cube[DOWN][8];
-	cube[DOWN][8] = cube[DOWN][2];
-	cube[DOWN][2] = temp;
-	temp = cube[DOWN][1];
-	cube[DOWN][1] = cube[DOWN][3];
-	cube[DOWN][3] = cube[DOWN][7];
-	cube[DOWN][7] = cube[DOWN][5];
-	cube[DOWN][5] = temp;
-}
-
-void initilize(int (&cube)[NUM_FACES][NUM_STICKERS]){
+void initilize(){
 	for (int x = 0; x<NUM_FACES; x++){
 		for (int y = 0; y<NUM_STICKERS; y++){
-			cube[x][y] = x;
+			CUBE[x][y] = x;
 		}
-	}//This is a solved cube at this point this initilizes the cube
+	}//This is a solved CUBE at this point this initializes the CUBE
 }
-
-void print(int (&cube)[NUM_FACES][NUM_STICKERS]){
-
-	std::cout<<"CUBE"<<std::endl;
-
-		std::cout<<"\t"<<PRINT_COLOR[cube[UP][0]] << PRINT_COLOR[cube[UP][1]] << PRINT_COLOR[cube[UP][2]]<<std::endl;
-		std::cout<<"\t"<<PRINT_COLOR[cube[UP][3]] << PRINT_COLOR[cube[UP][4]] << PRINT_COLOR[cube[UP][5]]<<std::endl;
-		std::cout<<"\t"<<PRINT_COLOR[cube[UP][6]] << PRINT_COLOR[cube[UP][7]] << PRINT_COLOR[cube[UP][8]]<<std::endl<<std::endl;
-
-		std::cout<<PRINT_COLOR[cube[LEFT][0]] << PRINT_COLOR[cube[LEFT][1]] << PRINT_COLOR[cube[LEFT][2]] <<"\t";
-		std::cout<<PRINT_COLOR[cube[FRONT][0]] << PRINT_COLOR[cube[FRONT][1]] << PRINT_COLOR[cube[FRONT][2]] <<"\t";
-		std::cout<<PRINT_COLOR[cube[RIGHT][0]] << PRINT_COLOR[cube[RIGHT][1]] << PRINT_COLOR[cube[RIGHT][2]] <<"\t";
-		std::cout<<PRINT_COLOR[cube[BACK][0]] << PRINT_COLOR[cube[BACK][1]] << PRINT_COLOR[cube[BACK][2]]<<std::endl;
-
-		std::cout<<PRINT_COLOR[cube[LEFT][3]] << PRINT_COLOR[cube[LEFT][4]] << PRINT_COLOR[cube[LEFT][5]] <<"\t";
-		std::cout<<PRINT_COLOR[cube[FRONT][3]] << PRINT_COLOR[cube[FRONT][4]] << PRINT_COLOR[cube[FRONT][5]] <<"\t";
-		std::cout<<PRINT_COLOR[cube[RIGHT][3]] << PRINT_COLOR[cube[RIGHT][4]] << PRINT_COLOR[cube[RIGHT][5]] <<"\t";
-		std::cout<<PRINT_COLOR[cube[BACK][3]] << PRINT_COLOR[cube[BACK][4]] << PRINT_COLOR[cube[BACK][5]]<<std::endl;
-
-		std::cout<<PRINT_COLOR[cube[LEFT][6]] << PRINT_COLOR[cube[LEFT][7]] << PRINT_COLOR[cube[LEFT][8]] <<"\t";
-		std::cout<<PRINT_COLOR[cube[FRONT][6]] << PRINT_COLOR[cube[FRONT][7]] << PRINT_COLOR[cube[FRONT][8]] <<"\t";
-		std::cout<<PRINT_COLOR[cube[RIGHT][6]] << PRINT_COLOR[cube[RIGHT][7]] << PRINT_COLOR[cube[RIGHT][8]] <<"\t";
-		std::cout<<PRINT_COLOR[cube[BACK][6]] << PRINT_COLOR[cube[BACK][7]] << PRINT_COLOR[cube[BACK][8]]<<std::endl<<std::endl;
-
-		std::cout<<"\t"<<PRINT_COLOR[cube[DOWN][0]] << PRINT_COLOR[cube[DOWN][1]] << PRINT_COLOR[cube[DOWN][2]]<<std::endl;
-		std::cout<<"\t"<<PRINT_COLOR[cube[DOWN][3]] << PRINT_COLOR[cube[DOWN][4]] << PRINT_COLOR[cube[DOWN][5]]<<std::endl;
-		std::cout<<"\t"<<PRINT_COLOR[cube[DOWN][6]] << PRINT_COLOR[cube[DOWN][7]] << PRINT_COLOR[cube[DOWN][8]]<<std::endl;
-/*	for (int x = 0; x<NUM_FACES; x++){
-		for (int y = 0; y<NUM_STICKERS; y++){
-			if(y%3 == 0){
-				std::cout<<std::endl;
-			}
-			std::cout<<cube[x][y];
-		}
-		std::cout<<"\t"<<FACE_NAME[x]<<std::endl;
-	}
-	std::cout<<std::endl;
-*/
-
-
-/*
-		UUU
-		UUU
-		UUU
-
-LLL		FFF		RRR		BBB
-LLL		FFF		RRR		BBB
-LLL		FFF		RRR		BBB
-
-		DDD
-		DDD
-		DDD
-*/
-
-}//This lets me print out all of the information I need for the cube
