@@ -5,23 +5,15 @@
 #define NUM_FACES 6
 #define NUM_STICKERS 9
 
-//char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
-char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
-
+char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
+//char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
 
 char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
 enum FACES{LEFT,BACK,UP,FRONT,RIGHT,DOWN};
 enum COLORS{GREEN, ORANGE, WHITE, RED, BLUE, YELLOW};
 
-/*int ATMV[6][16] = {		{UP,BACK,DOWN,FRONT,	0,3,6,8,5,2,0,3,6,0,3,6		},//LEFT
-						{UP,RIGHT,DOWN,LEFT,	0,1,2,2,5,8,6,7,8,0,3,6		},//BACK
-						{LEFT,FRONT,RIGHT,BACK,	0,1,2,0,1,2,0,1,2,0,1,2		},//UP
-						{LEFT,DOWN,RIGHT,UP,	2,5,8,0,1,2,6,3,0,8,7,6		},//FRONT
-						{UP,FRONT,DOWN,BACK,	2,5,8,2,5,8,2,5,8,6,3,0		},//RIGHT
-						{LEFT,BACK,RIGHT,FRONT,	6,7,8,6,7,8,6,7,8,6,7,8		}};//DOWN*/
-
 int ATMV[6][16] = {		{UP,BACK,DOWN,FRONT,	0,3,6,8,5,2,0,3,6,0,3,6		},//LEFT
-						{UP,RIGHT,DOWN,LEFT,	0,1,2,2,5,8,8,7,6,0,3,6		},//BACK
+						{UP,RIGHT,DOWN,LEFT,	0,1,2,2,5,8,8,7,6,6,3,0		},//BACK
 						{LEFT,FRONT,RIGHT,BACK,	0,1,2,0,1,2,0,1,2,0,1,2		},//UP
 						{LEFT,DOWN,RIGHT,UP,	2,5,8,0,1,2,6,3,0,8,7,6		},//FRONT
 						{UP,FRONT,DOWN,BACK,	2,5,8,2,5,8,2,5,8,6,3,0		},//RIGHT
@@ -46,9 +38,29 @@ std::string replaceText(std::string str);
 int main(){
 	//int CUBE [NUM_FACES][NUM_STICKERS];  //MY GOAL IS TO HAVE THIS BE AS FLEXIBLE AS POSSIBLE
 	initilize();
-	comands("D L D' U2 F L D2 L' D2 R"); //This appears to be working for single characters
-	
+	comands("F' R' D2 R' B' U' B' F L R B' U' R L2 U2 F B D' F L'"); //This appears to be working for any characters put in it
 	return 0;
+}
+
+void move(int SIDE){//Clockwise Turn
+	int temp = 	   CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]];
+	int temp0 =    CUBE[ATMV[SIDE][0]][ATMV[SIDE][5]];
+	int temp1 =    CUBE[ATMV[SIDE][0]][ATMV[SIDE][6]];
+	CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]] 	= CUBE[ATMV[SIDE][1]][ATMV[SIDE][7]];
+	CUBE[ATMV[SIDE][0]][ATMV[SIDE][5]] 	= CUBE[ATMV[SIDE][1]][ATMV[SIDE][8]];
+	CUBE[ATMV[SIDE][0]][ATMV[SIDE][6]] 	= CUBE[ATMV[SIDE][1]][ATMV[SIDE][9]];
+	CUBE[ATMV[SIDE][1]][ATMV[SIDE][7]] 	= CUBE[ATMV[SIDE][2]][ATMV[SIDE][10]];
+	CUBE[ATMV[SIDE][1]][ATMV[SIDE][8]] 	= CUBE[ATMV[SIDE][2]][ATMV[SIDE][11]];
+	CUBE[ATMV[SIDE][1]][ATMV[SIDE][9]] 	= CUBE[ATMV[SIDE][2]][ATMV[SIDE][12]];
+	CUBE[ATMV[SIDE][2]][ATMV[SIDE][10]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]];
+	CUBE[ATMV[SIDE][2]][ATMV[SIDE][11]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]];
+	CUBE[ATMV[SIDE][2]][ATMV[SIDE][12]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]];
+	CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]] = temp;
+	CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]] = temp0;
+	CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]] = temp1;
+	std::cout<<std::endl<<FACE_NAME[SIDE]<<std::endl;
+	rotateSingeFace(SIDE);
+	print();
 }
 
 void moveI(int SIDE){//Counter Clockwise Trun
@@ -60,38 +72,6 @@ void moveI(int SIDE){//Counter Clockwise Trun
 void move2(int SIDE){//2 Turns
  	move(SIDE);
  	move(SIDE);
- }
-
-void move(int SIDE){//Clockwise Turn
-	std::cout<<FACE_NAME[SIDE]<<std::endl;
-	int temp = CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]];
-	int temp0 = CUBE[ATMV[SIDE][0]][ATMV[SIDE][5]];
-	int temp1 = CUBE[ATMV[SIDE][0]][ATMV[SIDE][6]];
-	CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]] = CUBE[ATMV[SIDE][1]][ATMV[SIDE][7]];
-	CUBE[ATMV[SIDE][0]][ATMV[SIDE][5]] = CUBE[ATMV[SIDE][1]][ATMV[SIDE][8]];
-	CUBE[ATMV[SIDE][0]][ATMV[SIDE][6]] = CUBE[ATMV[SIDE][1]][ATMV[SIDE][9]];
-
-	CUBE[ATMV[SIDE][1]][ATMV[SIDE][7]] = CUBE[ATMV[SIDE][2]][ATMV[SIDE][10]];
-	CUBE[ATMV[SIDE][1]][ATMV[SIDE][8]] = CUBE[ATMV[SIDE][2]][ATMV[SIDE][11]];
-	CUBE[ATMV[SIDE][1]][ATMV[SIDE][9]] = CUBE[ATMV[SIDE][2]][ATMV[SIDE][12]];
-
-	CUBE[ATMV[SIDE][2]][ATMV[SIDE][10]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]];
-	CUBE[ATMV[SIDE][2]][ATMV[SIDE][11]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]];
-	CUBE[ATMV[SIDE][2]][ATMV[SIDE][12]] = CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]];
-
-	//if (ATMV[SIDE][16]){//I need to add this because LEFT and RIGHT are not congruent
-	CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]] = temp;
-	CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]] = temp0;
-	CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]] = temp1;
-	/*}
-	else{
-		CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]] = temp1;
-		CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]] = temp0;
-		CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]] = temp;	
-	}*/
-	rotateSingeFace(SIDE);
-	print();
-	std::cout<<std::endl;
 }
 
 void rotateSingeFace(int SIDE){ //I am seperating this out because rotating the cube will need this
@@ -146,37 +126,28 @@ std::string replaceText(std::string str){
 }//This gets rid of spaces and replaces ' with i (this stands of prime)
 
 void print(){
-	
-		
 		std::cout<<"\t"<<_CHAR[CUBE[UP][0]] << _CHAR[CUBE[UP][1]] << _CHAR[CUBE[UP][2]]<<std::endl;
 		std::cout<<"\t"<<_CHAR[CUBE[UP][3]] << _CHAR[CUBE[UP][4]] << _CHAR[CUBE[UP][5]]<<std::endl;
 		std::cout<<"\t"<<_CHAR[CUBE[UP][6]] << _CHAR[CUBE[UP][7]] << _CHAR[CUBE[UP][8]]<<std::endl<<std::endl;
-
 		std::cout<<_CHAR[CUBE[LEFT][0]] << _CHAR[CUBE[LEFT][1]] << _CHAR[CUBE[LEFT][2]] <<"\t";
 		std::cout<<_CHAR[CUBE[FRONT][0]] << _CHAR[CUBE[FRONT][1]] << _CHAR[CUBE[FRONT][2]] <<"\t";
 		std::cout<<_CHAR[CUBE[RIGHT][0]] << _CHAR[CUBE[RIGHT][1]] << _CHAR[CUBE[RIGHT][2]] <<"\t";
 		std::cout<<_CHAR[CUBE[BACK][0]] << _CHAR[CUBE[BACK][1]] << _CHAR[CUBE[BACK][2]]<<std::endl;
-
 		std::cout<<_CHAR[CUBE[LEFT][3]] << _CHAR[CUBE[LEFT][4]] << _CHAR[CUBE[LEFT][5]] <<"\t";
 		std::cout<<_CHAR[CUBE[FRONT][3]] << _CHAR[CUBE[FRONT][4]] << _CHAR[CUBE[FRONT][5]] <<"\t";
 		std::cout<<_CHAR[CUBE[RIGHT][3]] << _CHAR[CUBE[RIGHT][4]] << _CHAR[CUBE[RIGHT][5]] <<"\t";
 		std::cout<<_CHAR[CUBE[BACK][3]] << _CHAR[CUBE[BACK][4]] << _CHAR[CUBE[BACK][5]]<<std::endl;
-
 		std::cout<<_CHAR[CUBE[LEFT][6]] << _CHAR[CUBE[LEFT][7]] << _CHAR[CUBE[LEFT][8]] <<"\t";
 		std::cout<<_CHAR[CUBE[FRONT][6]] << _CHAR[CUBE[FRONT][7]] << _CHAR[CUBE[FRONT][8]] <<"\t";
 		std::cout<<_CHAR[CUBE[RIGHT][6]] << _CHAR[CUBE[RIGHT][7]] << _CHAR[CUBE[RIGHT][8]] <<"\t";
 		std::cout<<_CHAR[CUBE[BACK][6]] << _CHAR[CUBE[BACK][7]] << _CHAR[CUBE[BACK][8]]<<std::endl<<std::endl;
-
 		std::cout<<"\t"<<_CHAR[CUBE[DOWN][0]] << _CHAR[CUBE[DOWN][1]] << _CHAR[CUBE[DOWN][2]]<<std::endl;
 		std::cout<<"\t"<<_CHAR[CUBE[DOWN][3]] << _CHAR[CUBE[DOWN][4]] << _CHAR[CUBE[DOWN][5]]<<std::endl;
 		std::cout<<"\t"<<_CHAR[CUBE[DOWN][6]] << _CHAR[CUBE[DOWN][7]] << _CHAR[CUBE[DOWN][8]]<<std::endl;
-		
 }
 
 void initilize(){
-	for (int x = 0; x<NUM_FACES; x++){
-		for (int y = 0; y<NUM_STICKERS; y++){
+	for (int x = 0; x<NUM_FACES; x++)
+		for (int y = 0; y<NUM_STICKERS; y++)
 			CUBE[x][y] = x;
-		}
-	}//This is a solved CUBE at this point this initializes the CUBE
 }
