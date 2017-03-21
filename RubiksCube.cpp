@@ -33,7 +33,8 @@ void move2(int SIDE);	//DOES A MOVE TWICE
 void moveI(int SIDE);	//DOES A MOVE COUNTER CLOCKWISE
 void comands(std::string str); 
 void rotateSingleFace(int SIDE);
-void rotation(int SIDE);
+void rotation(int _int);
+void rotation(std::string _str);
 std::string replaceText(std::string str);
 
 void rotationX();
@@ -45,9 +46,9 @@ int main(){
 	//int CUBE [NUM_FACES][NUM_STICKERS];  //MY GOAL IS TO HAVE THIS BE AS FLEXIBLE AS POSSIBLE
 	initilize();
 	comands("L2 R U"); //This appears to be working for any characters put in it
-	rotationX();
-	rotationY();
-	rotationZ();//This appears to be working now I can might be able to consolidate this to a single function call
+	rotation("x");
+	rotation("y");
+	rotation("z");//This appears to be working now I can might be able to consolidate this to a single function call
 	return 0;
 }
 
@@ -70,6 +71,33 @@ void move(int SIDE){//Clockwise Turn
 	std::cout<<std::endl<<FACE_NAME[SIDE]<<std::endl;
 	rotateSingleFace(SIDE);
 	print();
+}
+
+
+
+
+
+
+void rotation(std::string _str){//These rotation functions are now what I want but they will work for now
+	std::transform(_str.begin(), _str.end(), _str.begin(), ::tolower);
+	if(_str=="x")
+		rotationX();
+	else if(_str=="y")
+		rotationY();
+	else if(_str=="z")
+		rotationZ();
+	else
+		std::cout<<"ROTATION CALLED BUT NOT APPLIED"<<std::endl;
+}
+void rotation(int _int){
+	if(_int == 0)
+		rotationX();
+	else if(_int==1)
+		rotationY();
+	else if(_int==2)
+		rotationZ();
+	else
+		std::cout<<"ROTATION CALLED BUT NOT APPLIED"<<std::endl;
 }
 
 void rotationX(){//GOOD
