@@ -10,12 +10,12 @@ char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
 enum FACES{LEFT,BACK,UP,FRONT,RIGHT,DOWN};
 enum COLORS{GREEN, ORANGE, WHITE, RED, BLUE, YELLOW};
 
-int ATMV[6][17] = {{UP,BACK,DOWN,FRONT,	0,3,6,8,5,2,0,3,6,0,3,6,true},
-						{UP,RIGHT,DOWN,LEFT,	0,1,2,2,5,8,6,7,8,0,3,6,false},
-						{LEFT,FRONT,RIGHT,BACK,	0,1,2,0,1,2,0,1,2,0,1,2,false},
-						{LEFT,DOWN,RIGHT,UP,	2,5,8,0,1,2,6,3,0,8,7,6,false},
-						{UP,FRONT,DOWN,BACK,	2,5,8,2,5,8,2,5,8,6,3,0,true},
-						{LEFT,BACK,RIGHT,FRONT,	6,7,8,6,7,8,6,7,8,6,7,8,false}}; //THIS IS WHERE THE MAGIC HAPPEND
+int ATMV[6][17] = {		{UP,BACK,DOWN,FRONT,	0,3,6,8,5,2,0,3,6,0,3,6,true	},
+						{UP,RIGHT,DOWN,LEFT,	0,1,2,2,5,8,6,7,8,0,3,6,false	},
+						{LEFT,FRONT,RIGHT,BACK,	0,1,2,0,1,2,0,1,2,0,1,2,false	},
+						{LEFT,DOWN,RIGHT,UP,	2,5,8,0,1,2,6,3,0,8,7,6,false	},
+						{UP,FRONT,DOWN,BACK,	2,5,8,2,5,8,2,5,8,6,3,0,true	},
+						{LEFT,BACK,RIGHT,FRONT,	6,7,8,6,7,8,6,7,8,6,7,8,false	}}; //THIS IS WHERE THE MAGIC HAPPEND
 
 int CUBE [NUM_FACES][NUM_STICKERS];
 
@@ -35,105 +35,43 @@ std::string replaceText(std::string str);
 int main(){
 	//int CUBE [NUM_FACES][NUM_STICKERS];  //MY GOAL IS TO HAVE THIS BE AS FLEXIBLE AS POSSIBLE
 	initilize();
-	comands("L2 D' R2 D R' B U F' L' F' R D' L F2 U' F' R' F2 R2 F L F2 D2 B L2'");
-	
+	comands("R U D2"); //This appears to be working for single characters
 	return 0;
 }
 
-
-
 char strAlphas[12][3] = {"Li","L2","Bi","B2","Ui","U2","Fi","F2","Ri","R2","Di","D2"};
-char strBetas[6][2] = {"L","B","U","F","D"};
+char strBetas[6][2] = {"L","B","U","F","R","D"};
 
-
-
-void comands(std::string str){ 
-
+void comands(std::string str){ //This preforms all moves sent to the cube 
 	str = replaceText(str);
-
-	std::cout<<"ORIGINAL TEXT:\t";//<<std::endl;
-	std::cout<<str<<std::endl;
-
-	int strLen = 0;
-	while(strLen<=str.length()-1){
-		bool isValidChar = false;
-		for (int i = 0; i < 3*6; i++)
-			if(str.substr(strLen,2) == validChar[i]){ //This looks for single characters
-				isValidChar = true;
-				//std::cout<<str.substr(strLen,2)<<std::endl;
-				strLen++;
-				std::string strAlpha = str.substr(strLen,2);
-
-				for (int i = 0; i<6*2; i++){
-					if(i%2 == true){
-						if(strAlpha==strAlphas[i]){
-							move2(i);
-						}
-					}
-				 	else if (i%2 == false){
-						if(strAlpha==strAlphas[i]){
-							moveI(i);
-						}
-					}
-				}//This is what I want to work on*/
-
-				if(strAlpha=="L2")
-					move2(LEFT);			
-				else if(strAlpha=="B2")
-					move2(BACK);
-				else if(strAlpha=="U2")
-					move2(UP);
-				else if(strAlpha=="F2")
-					move2(FRONT);
-				else if(strAlpha=="R2")
-					move2(RIGHT);
-				else if(strAlpha=="D2")
-					move2(DOWN);
-				else if(strAlpha=="Li")
-					moveI(LEFT);			
-				else if(strAlpha=="Bi")
-					moveI(BACK);
-				else if(strAlpha=="Ui")
-					moveI(UP);
-				else if(strAlpha=="Fi")
-					moveI(FRONT);
-				else if(strAlpha=="Ri")
-					moveI(RIGHT);
-				else if(strAlpha=="Di")
-					moveI(DOWN);
+	int strLen = 0; //have this outside so it dosn't get reset
+	while(strLen<=str.length()-1){	
+		std::string strBeta;
+		std::string strAlpha;
+		bool isValidChar = true;
+		strAlpha = str.substr(strLen,2);
+		strBeta = str.substr(strLen,1);
+		for (int i = 0; i <6*2; i++){
+			if(strAlpha == strAlphas[i]){
+				if(i%2==0){
+					moveI(i/2);
+					strLen++;
+				}
 				else{
-					std::cout<<"FAILA"<<std::endl;
+					move2((i-1)/2);
+					strLen++;
 				}
 			}
-		if(isValidChar == false){ //This looks for double characters
-			std::string strBeta = str.substr(strLen,1);
-			//std::cout<<str.substr(strLen,1)<<std::endl;
-
-			if(strBeta=="L")
-				move(LEFT);			
-			else if(strBeta=="B")
-				move(BACK);
-			else if(strBeta=="U")
-				move(UP);
-			else if(strBeta=="F")
-				move(FRONT);
-			else if(strBeta=="R")
-				move(RIGHT);
-			else if(strBeta=="D")
-				move(DOWN);
-			else{
-				std::cout<<"FAILB"<<std::endl;
-			}
-
 		}
-			//std::string x = str.substr(strLen,1);
-			//std::cout<<x<<"\tXXX"<<std::endl;
-
+		strAlpha = str.substr(strLen,2); 
+		strBeta = str.substr(strLen,1);
+		for (int i = 0; i<6; i++){
+			if (strBeta == strBetas[i]){
+				move(i); 
+			}
+		}
 		strLen++;
 	}
-
-
-	//OK so now I need to do a switch statemnt to see what the letters where
 }
 
 std::string replaceText(std::string str){
@@ -196,8 +134,8 @@ void move(int SIDE){
 }
 
 void print(){
-
-
+	
+		
 		std::cout<<"\t"<<_CHAR[CUBE[UP][0]] << _CHAR[CUBE[UP][1]] << _CHAR[CUBE[UP][2]]<<std::endl;
 		std::cout<<"\t"<<_CHAR[CUBE[UP][3]] << _CHAR[CUBE[UP][4]] << _CHAR[CUBE[UP][5]]<<std::endl;
 		std::cout<<"\t"<<_CHAR[CUBE[UP][6]] << _CHAR[CUBE[UP][7]] << _CHAR[CUBE[UP][8]]<<std::endl<<std::endl;
@@ -220,6 +158,7 @@ void print(){
 		std::cout<<"\t"<<_CHAR[CUBE[DOWN][0]] << _CHAR[CUBE[DOWN][1]] << _CHAR[CUBE[DOWN][2]]<<std::endl;
 		std::cout<<"\t"<<_CHAR[CUBE[DOWN][3]] << _CHAR[CUBE[DOWN][4]] << _CHAR[CUBE[DOWN][5]]<<std::endl;
 		std::cout<<"\t"<<_CHAR[CUBE[DOWN][6]] << _CHAR[CUBE[DOWN][7]] << _CHAR[CUBE[DOWN][8]]<<std::endl;
+		
 }
 
 void initilize(){
