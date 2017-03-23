@@ -1,12 +1,14 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <tuple>
+//#include <stdexcept>
 
 #define NUM_FACES 6
 #define NUM_STICKERS 9
 
-char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
-//char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
+//char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
+char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
 
 char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
 int OPPISITESIDE[6] = {4,3,5,1,0,2};
@@ -35,22 +37,245 @@ void comands(std::string str);
 void rotateSingleFace(int SIDE);
 void rotation(int _int);
 void rotation(std::string _str);
+
+void rotationI(int SIDE);
+void rotation2(int SIDE);
+void rotationI(std::string SIDE);
+void rotation2(std::string SIDE);
+
 std::string replaceText(std::string str);
 
 void rotationX();
 void rotationY();
 void rotationZ();
 
+bool checkFaceAllSame();
+bool doesSideHaveCross(int SIDE);
+//std::tuple<int,int> targetEdgeCube();
+int targetEdgeCubeX();
+int targetEdgeCubeY();
+
+bool checkCross(int SIDE);
+void makeCross();
+
 
 int main(){
-	//int CUBE [NUM_FACES][NUM_STICKERS];  //MY GOAL IS TO HAVE THIS BE AS FLEXIBLE AS POSSIBLE
 	initilize();
-	comands("L2 R U"); //This appears to be working for any characters put in it
-	rotation("x");
-	rotation("y");
-	rotation("z");//This appears to be working now I can might be able to consolidate this to a single function call
+	//makeCross();
+	//comands("L2 R U"); 
+	//rotation("x");
+	//rotation("y");
+	//rotation("z");	
+
+	//I need to pick a side to work on 
+	//For now my target will be the top
+	//STEP ONE: MAKE A CROSS 			//This will probably be the most difficult to solve
+	//A USEFULL METHOD THAT I CAN HAVE IS A TARGETING SYSTEM
+	//I CAN HAVE ONE FOR EDGE PIECES AND ONE FOR CORNER PIECES
+	//I am going to actually start out will the easiest one which is the last algoritm
+	//The only problem since I made the algorithm I will have to recreate it
+
+	//checkState();
+
+
+	comands("U' D L U2 F D U B' R' L2 B F2 R2 D2 R' L2 D2 B2 F R2 U' F D2 U F");
+	makeCross();
+	
 	return 0;
 }
+
+
+
+
+
+
+
+//When I am going to check a valid cross I will have to check the edge pieces
+
+
+
+/* 		EDGE PIECES
+CUBE[UP][1] and CUBE[BACK][1]
+CUBE[UP][3] and CUBE[LEFT][1]
+CUBE[UP][5] and CUBE[FRONT][1]
+CUBE[UP][7] and CUBE[RIGHT][1]
+
+CUBE[BACK][1] and CUBE[BACK][7]
+CUBE[BACK][3] and CUBE[LEFT][7]
+CUBE[BACK][5] and CUBE[FRONT][7]
+CUBE[BACK][7] and CUBE[RIGHT][7]
+
+CUBE[FRONT][5] and CUBE[RIGHT][3]
+CUBE[RIGHT][5] and CUBE[BACK][3]
+CUBE[BACK][5]  and CUBE[LEFT][3]
+CUBE[LEFT][5]  and CUBE[FRONT][3]
+*/
+
+
+
+void makeCross(){
+//Well the first, instead of checking for a cross, I should just make the cross for the UP face.
+	//to do that I should make a temp of the top side
+	
+	while(not doesSideHaveCross(UP)){//If the up side isn't solved yet then keep trying
+	
+
+
+		/*bool temp[NUM_STICKERS];
+		for (int i = 0; i<NUM_STICKERS; i++){
+			temp[i]=CUBE[UP][i];
+		}//So now the temp has the up side*/
+
+		
+		//[0,1,2]
+		//[3,4,5]
+		//[6,7,8]
+
+		//I should see if any of these match
+		for (int i = 0; i<NUM_STICKERS; i++){
+			if(CUBE[UP][i]==CUBE[UP][4]){
+				temp[i]=true;
+			}
+			else{
+				temp[i]=false;
+			}
+		}
+
+		int targetSide 		= targetEdgeCubeX(); //I would like to make this a tuple when I can figure that out other wise this will have to do
+		int tragetPosition 	= targetEdgeCubeY();
+
+
+		while(CUBE[targetSide][5]!=CUBE[UP][4]){ //This says if cube position 5 is equal to white then 
+			move(targetSide); //move the target side
+		}
+
+		
+
+
+
+
+
+		if(targetSide==FRONT){//THIS RELIES ON THE ASSUMPTION THAT THE PREVIOUS WHILE WORKED AND THE POSITION OF THE TARGET IS IN THE TARGETS SIDE AND IN THE 5TH POSITION
+			move(RIGHT);}
+		else if (targetSide == RIGHT){
+			moveI(UP);
+			rotation("Y");}
+		else if (targetSide == BACK){
+			move2(UP);
+			rotation2("Y");}
+		else if (targetSide == LEFT){
+			moveI(UP);
+			rotationI("Y");}
+		else if (targetSide==DOWN){
+			move2(RIGHT);
+		}
+
+		moveI(UP);//This just lets it do it again if it is good
+
+		//so when I target a cube since I want to have the target be up things will behave nicely
+		//I want it so that the pice I target goes into the 5th postion this will be done by rotating the x side
+		//move(x) until target is in 5th
+	}
+}
+
+
+
+
+
+
+
+
+
+
+void rotationI(int SIDE){
+	rotation2(SIDE);
+	rotation(SIDE);
+}
+void rotation2(int SIDE){
+	rotation(SIDE);
+	rotation(SIDE);
+}
+
+void rotationI(std::string SIDE){
+	rotation2(SIDE);
+	rotation(SIDE);
+}
+void rotation2(std::string SIDE){
+	rotation(SIDE);
+	rotation(SIDE);
+}
+
+
+
+int targetEdgeCubeY(){
+	//I want to target a piece that I want on the cube
+	//To do this 
+	for (int x = 0; x<NUM_FACES; x++){
+		for (int y=0; y <NUM_STICKERS; y++){
+			if(x != UP){
+				//Look for it as long as it isn't looking at the UP face
+				if(CUBE[x][y]==CUBE[UP][4]){
+					//This is the target
+					//return (x and y);
+					//return std::make_tuple(x, y);
+					return y;
+				}
+			}
+		}
+	}
+	return 100;
+}
+int targetEdgeCubeX(){
+	//I want to target a piece that I want on the cube
+	//To do this 
+	for (int x = 0; x<NUM_FACES; x++){
+		for (int y=0; y <NUM_STICKERS; y++){
+			if(x != UP){
+				//Look for it as long as it isn't looking at the UP face
+				if(CUBE[x][y]==CUBE[UP][4]){
+					//This is the target
+					//return (x and y);
+					//return std::make_tuple(x, y);
+					return x;
+				}
+			}
+		}
+	}
+	return 100;
+}
+
+
+
+
+
+
+bool doesSideHaveCross(int SIDE){
+	for (int y = 1; y<NUM_STICKERS-2; y+=2){
+		if(CUBE[SIDE][0+y]!=CUBE[SIDE][2+y]){
+			return false;
+		}
+	}	
+	return true;	
+}
+
+
+/*
+bool checkFaceAllSame(){
+	for(int x = 0;x<NUM_FACES;x++){
+		bool allSame = true;
+		for (int y = 0; y<NUM_STICKERS; y++){
+			if(CUBE[x][0+y]==CUBE[x][1+y]){
+				allSame=false;
+			}
+		}
+		if(allSame){
+			return true;//x is the face that is all  the same
+		}
+
+	}
+	return false;
+}*/
+
 
 void move(int SIDE){//Clockwise Turn
 	int temp = 	   CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]];
@@ -72,11 +297,6 @@ void move(int SIDE){//Clockwise Turn
 	rotateSingleFace(SIDE);
 	print();
 }
-
-
-
-
-
 
 void rotation(std::string _str){//These rotation functions are now what I want but they will work for now
 	std::transform(_str.begin(), _str.end(), _str.begin(), ::tolower);
