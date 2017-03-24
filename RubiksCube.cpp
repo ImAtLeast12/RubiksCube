@@ -8,7 +8,9 @@
 #define NUM_STICKERS 9
 
 //char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
-char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
+//char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
+
+char _CHAR[6][2] = {"G","O","W","R","B","Y"};//MY CUBE
 
 char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
 int OPPISITESIDE[6] = {4,3,5,1,0,2};
@@ -78,8 +80,12 @@ int main(){
 	//checkState();
 
 
-	comands("U' D L U2 F D U B' R' L2 B F2 R2 D2 R' L2 D2 B2 F R2 U' F D2 U F");
+	comands("R2 D' U L D U2 L R' D' R2");
+	print();
+
+
 	makeCross();
+	//print();
 	
 	return 0;
 }
@@ -116,61 +122,77 @@ CUBE[LEFT][5]  and CUBE[FRONT][3]
 void makeCross(){
 //Well the first, instead of checking for a cross, I should just make the cross for the UP face.
 	//to do that I should make a temp of the top side
+	//while(not doesSideHaveCross(UP)){//If the up side isn't solved yet then keep trying
+
 	
-	while(not doesSideHaveCross(UP)){//If the up side isn't solved yet then keep trying
-	
 
+	//for (int loops = 0; (loops<=200) and (not doesSideHaveCross(UP)) ; loops++){
+	while(not doesSideHaveCross(UP)){ //this prevents infinit loops 		I am not sure how many loops it needs to be definite though
 
-		/*bool temp[NUM_STICKERS];
-		for (int i = 0; i<NUM_STICKERS; i++){
-			temp[i]=CUBE[UP][i];
-		}//So now the temp has the up side*/
-
-		
 		//[0,1,2]
 		//[3,4,5]
 		//[6,7,8]
 
-		//I should see if any of these match
-		for (int i = 0; i<NUM_STICKERS; i++){
-			if(CUBE[UP][i]==CUBE[UP][4]){
-				temp[i]=true;
-			}
-			else{
-				temp[i]=false;
-			}
-		}
-
-		int targetSide 		= targetEdgeCubeX(); //I would like to make this a tuple when I can figure that out other wise this will have to do
-		int tragetPosition 	= targetEdgeCubeY();
+		/*
+						to make a cross is quite simple
+			check 		first you need to check that you don't have a cross on the face that you are working on
+									if you do have a check then you can end the function
+						else continue
 
 
-		while(CUBE[targetSide][5]!=CUBE[UP][4]){ //This says if cube position 5 is equal to white then 
-			move(targetSide); //move the target side
-		}
+						then next thing that you need to work on is targeting a cubelet that you need
+									you need to have a cubelet that is the same color as UP's middle position
+									You will target what side it is on, and what position it is at
+
+						the next thing that you will need to work on is bringing the cublets to the space that they need
+									rotate the side so that it is in the 5th position
+
+
+		*/
+
+
 
 		
 
+		int targetSide 		= targetEdgeCubeX(); //I would like to make this a tuple when I can figure that out other wise this will have to do
+		int targetPosition 	= targetEdgeCubeY();
+		std::cout<<"PRINT TARGET"<<FACE_NAME[targetSide]<<"\t"<<targetPosition<<std::endl;
 
 
 
+		//while(CUBE[targetSide][5]!=CUBE[UP][4])//This says if cube position 5 is equal to white then 
+		//	move(targetSide); //move the target side
 
-		if(targetSide==FRONT){//THIS RELIES ON THE ASSUMPTION THAT THE PREVIOUS WHILE WORKED AND THE POSITION OF THE TARGET IS IN THE TARGETS SIDE AND IN THE 5TH POSITION
-			move(RIGHT);}
-		else if (targetSide == RIGHT){
-			moveI(UP);
-			rotation("Y");}
-		else if (targetSide == BACK){
-			move2(UP);
-			rotation2("Y");}
-		else if (targetSide == LEFT){
-			moveI(UP);
-			rotationI("Y");}
-		else if (targetSide==DOWN){
-			move2(RIGHT);
+		for (int i = 0; (i<4 and (CUBE[targetSide][5]!=CUBE[UP][4])); i++)
+			move(targetSide);			
+		
+
+		if(targetSide==LEFT){//THIS RELIES ON THE ASSUMPTION THAT THE PREVIOUS WHILE WORKED AND THE POSITION OF THE TARGET IS IN THE TARGETS SIDE AND IN THE 5TH POSITION
+			rotation(1);
+			rotation(1);
+			rotation(1);
+			move(UP);
+			move(RIGHT);
 		}
-
-		moveI(UP);//This just lets it do it again if it is good
+		else if (targetSide == FRONT){
+			move(RIGHT);
+		}
+		else if (targetSide == RIGHT){
+			rotation(1);
+			moveI(UP);
+			move(RIGHT);
+		}
+		else if (targetSide == BACK){
+			rotation(1);
+			rotation(1);
+			move2(UP);
+			move(RIGHT);
+		}
+		else if (targetSide==DOWN){
+			move(RIGHT);
+			move(RIGHT);
+		}
+		moveI(UP);
 
 		//so when I target a cube since I want to have the target be up things will behave nicely
 		//I want it so that the pice I target goes into the 5th postion this will be done by rotating the x side
@@ -207,11 +229,15 @@ void rotation2(std::string SIDE){
 
 
 
+
+
+
+
 int targetEdgeCubeY(){
 	//I want to target a piece that I want on the cube
 	//To do this 
 	for (int x = 0; x<NUM_FACES; x++){
-		for (int y=0; y <NUM_STICKERS; y++){
+		for (int y=1; y <NUM_STICKERS; y+=2){
 			if(x != UP){
 				//Look for it as long as it isn't looking at the UP face
 				if(CUBE[x][y]==CUBE[UP][4]){
@@ -223,13 +249,13 @@ int targetEdgeCubeY(){
 			}
 		}
 	}
-	return 100;
+	return -1;
 }
 int targetEdgeCubeX(){
 	//I want to target a piece that I want on the cube
 	//To do this 
 	for (int x = 0; x<NUM_FACES; x++){
-		for (int y=0; y <NUM_STICKERS; y++){
+		for (int y=1; y <NUM_STICKERS; y+=2){
 			if(x != UP){
 				//Look for it as long as it isn't looking at the UP face
 				if(CUBE[x][y]==CUBE[UP][4]){
@@ -241,7 +267,7 @@ int targetEdgeCubeX(){
 			}
 		}
 	}
-	return 100;
+	return -1;
 }
 
 
