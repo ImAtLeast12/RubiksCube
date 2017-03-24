@@ -9,7 +9,6 @@
 
 //char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
 //char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
-
 char _CHAR[6][2] = {"G","O","W","R","B","Y"};//MY CUBE
 
 char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
@@ -25,6 +24,21 @@ int ATMV[6][16] = {		{UP,BACK,DOWN,FRONT,	0,3,6,8,5,2,0,3,6,0,3,6		},//LEFT
 						{LEFT,BACK,RIGHT,FRONT,	6,7,8,6,7,8,6,7,8,6,7,8		}};//DOWN
 
 int CUBE [NUM_FACES][NUM_STICKERS];
+
+
+
+
+/*STAR/int CUBE[NUM_FACES][NUM_STICKERS] =  {{0,1,2,3,4,5,6,7,8},
+									{9,10,11,12,13,14,15,16,17},
+									{18,19,20,21,22,23,24,25,26},
+									{27,28,29,30,31,32,33,34,35},
+									{36,37,38,39,40,41,42,43,44},
+									{45,46,47,48,49,50,51,52,53}};
+//This is just for testing purpouses/**/
+
+
+
+
 
 char VALID_TWO_CHAR_COMMANDS[12][3] = {"Li","L2","Bi","B2","Ui","U2","Fi","F2","Ri","R2","Di","D2"};
 char VALID_ONE_CHAR_COMMANDS[6][2] = {"L","B","U","F","R","D"};
@@ -51,6 +65,7 @@ void rotationX();
 void rotationY();
 void rotationZ();
 
+void rotateSingleFace2(int SIDE);
 bool checkFaceAllSame();
 bool doesSideHaveCross(int SIDE);
 //std::tuple<int,int> targetEdgeCube();
@@ -59,15 +74,32 @@ int targetEdgeCubeY();
 
 bool checkCross(int SIDE);
 void makeCross();
+void solveCross();
+
+void rotateSingleFaceI(int SIDE);
+void solveSecondLayer();
 
 
 int main(){
+	/*THIS IS FOR THE TESTING THAT HAS ALL OF THE INTEGERS PUT A STAR HERE/
+	print();
+	rotationX();/**/
+
+
+	/*PUT STAR HERE*/
 	initilize();
-	//makeCross();
-	//comands("L2 R U"); 
-	//rotation("x");
-	//rotation("y");
-	//rotation("z");	
+	comands("U' F B2 D R2 L B' D U B U2 B2 F U' L2 B L D' B L R' F2 U' D B'");
+	makeCross();
+	std::cout<<std::endl;
+	print();
+
+	//comands("B2 L2 F2 R2");
+	solveCross();/*This seams to be working*/
+
+	//The next thing I need to do is solve the second layer doing this involves a couple algoritms that can be placed easily
+	//I am also going to have to put the yellow side face up
+
+
 
 	//I need to pick a side to work on 
 	//For now my target will be the top
@@ -75,57 +107,38 @@ int main(){
 	//A USEFULL METHOD THAT I CAN HAVE IS A TARGETING SYSTEM
 	//I CAN HAVE ONE FOR EDGE PIECES AND ONE FOR CORNER PIECES
 	//I am going to actually start out will the easiest one which is the last algoritm
-	//The only problem since I made the algorithm I will have to recreate it
-
-	//checkState();
-
-
-	comands("R2 D' U L D U2 L R' D' R2");
-	print();
-
-
-	makeCross();
-	//print();
-	
+	//The only problem since I made the algorithm I will have to recreate it	
 	return 0;
 }
 
 
+void solveSecondLayer(){
+	//FIRST THING I NEED TO DO IS FLIP THE CUBE SO THAT THE YELLOW FACE IS ON TOP
+	rotation("Z");
+	rotation("Z");
 
+}
 
+void solveCross(){
+	for(int i = 0; i<4; i++){
+		move2(FRONT);
+		rotation(1);
+	}//THIS MAKES DAISY
 
-
-
-//When I am going to check a valid cross I will have to check the edge pieces
-
-
-
-/* 		EDGE PIECES
-CUBE[UP][1] and CUBE[BACK][1]
-CUBE[UP][3] and CUBE[LEFT][1]
-CUBE[UP][5] and CUBE[FRONT][1]
-CUBE[UP][7] and CUBE[RIGHT][1]
-
-CUBE[BACK][1] and CUBE[BACK][7]
-CUBE[BACK][3] and CUBE[LEFT][7]
-CUBE[BACK][5] and CUBE[FRONT][7]
-CUBE[BACK][7] and CUBE[RIGHT][7]
-
-CUBE[FRONT][5] and CUBE[RIGHT][3]
-CUBE[RIGHT][5] and CUBE[BACK][3]
-CUBE[BACK][5]  and CUBE[LEFT][3]
-CUBE[LEFT][5]  and CUBE[FRONT][3]
-*/
-
-
+	for(int i = 0; i<4; i++){//I NEED TO PULL 4 PEICES UP
+		while(CUBE[FRONT][7]!=CUBE[FRONT][4]){ //IF THEY MATCH THE MIDDLE AND THE BOTTOM
+			move(DOWN);
+			rotation(1);
+		}
+		move2(FRONT);//IF THE BOTTOM MIDDLE PIECE IS THE SAME AS THE MIDDLE PIECE THEN I AM GOING TO 
+		rotation(1);
+	}
+}
 
 void makeCross(){
 //Well the first, instead of checking for a cross, I should just make the cross for the UP face.
 	//to do that I should make a temp of the top side
 	//while(not doesSideHaveCross(UP)){//If the up side isn't solved yet then keep trying
-
-	
-
 	//for (int loops = 0; (loops<=200) and (not doesSideHaveCross(UP)) ; loops++){
 	while(not doesSideHaveCross(UP)){ //this prevents infinit loops 		I am not sure how many loops it needs to be definite though
 
@@ -199,6 +212,9 @@ void makeCross(){
 		//move(x) until target is in 5th
 	}
 }
+
+
+
 
 
 
@@ -285,7 +301,7 @@ bool doesSideHaveCross(int SIDE){
 }
 
 
-/*
+
 bool checkFaceAllSame(){
 	for(int x = 0;x<NUM_FACES;x++){
 		bool allSame = true;
@@ -300,8 +316,55 @@ bool checkFaceAllSame(){
 
 	}
 	return false;
-}*/
+}
 
+/*THIS ONE IS FOR LETTERS PUT STAR HERE*/
+void print(){
+		std::cout<<"\t"<<_CHAR[CUBE[UP][0]] << _CHAR[CUBE[UP][1]] << _CHAR[CUBE[UP][2]]<<std::endl;
+		std::cout<<"\t"<<_CHAR[CUBE[UP][3]] << _CHAR[CUBE[UP][4]] << _CHAR[CUBE[UP][5]]<<std::endl;
+		std::cout<<"\t"<<_CHAR[CUBE[UP][6]] << _CHAR[CUBE[UP][7]] << _CHAR[CUBE[UP][8]]<<std::endl<<std::endl;
+		std::cout<<_CHAR[CUBE[LEFT][0]] << _CHAR[CUBE[LEFT][1]] << _CHAR[CUBE[LEFT][2]] <<"\t";
+		std::cout<<_CHAR[CUBE[FRONT][0]] << _CHAR[CUBE[FRONT][1]] << _CHAR[CUBE[FRONT][2]] <<"\t";
+		std::cout<<_CHAR[CUBE[RIGHT][0]] << _CHAR[CUBE[RIGHT][1]] << _CHAR[CUBE[RIGHT][2]] <<"\t";
+		std::cout<<_CHAR[CUBE[BACK][0]] << _CHAR[CUBE[BACK][1]] << _CHAR[CUBE[BACK][2]]<<std::endl;
+		std::cout<<_CHAR[CUBE[LEFT][3]] << _CHAR[CUBE[LEFT][4]] << _CHAR[CUBE[LEFT][5]] <<"\t";
+		std::cout<<_CHAR[CUBE[FRONT][3]] << _CHAR[CUBE[FRONT][4]] << _CHAR[CUBE[FRONT][5]] <<"\t";
+		std::cout<<_CHAR[CUBE[RIGHT][3]] << _CHAR[CUBE[RIGHT][4]] << _CHAR[CUBE[RIGHT][5]] <<"\t";
+		std::cout<<_CHAR[CUBE[BACK][3]] << _CHAR[CUBE[BACK][4]] << _CHAR[CUBE[BACK][5]]<<std::endl;
+		std::cout<<_CHAR[CUBE[LEFT][6]] << _CHAR[CUBE[LEFT][7]] << _CHAR[CUBE[LEFT][8]] <<"\t";
+		std::cout<<_CHAR[CUBE[FRONT][6]] << _CHAR[CUBE[FRONT][7]] << _CHAR[CUBE[FRONT][8]] <<"\t";
+		std::cout<<_CHAR[CUBE[RIGHT][6]] << _CHAR[CUBE[RIGHT][7]] << _CHAR[CUBE[RIGHT][8]] <<"\t";
+		std::cout<<_CHAR[CUBE[BACK][6]] << _CHAR[CUBE[BACK][7]] << _CHAR[CUBE[BACK][8]]<<std::endl<<std::endl;
+		std::cout<<"\t"<<_CHAR[CUBE[DOWN][0]] << _CHAR[CUBE[DOWN][1]] << _CHAR[CUBE[DOWN][2]]<<std::endl;
+		std::cout<<"\t"<<_CHAR[CUBE[DOWN][3]] << _CHAR[CUBE[DOWN][4]] << _CHAR[CUBE[DOWN][5]]<<std::endl;
+		std::cout<<"\t"<<_CHAR[CUBE[DOWN][6]] << _CHAR[CUBE[DOWN][7]] << _CHAR[CUBE[DOWN][8]]<<std::endl;
+}
+
+/* THIS ONE IS FOR NUMBERS PUT STAR/
+void print(){
+		std::cout<<"\t\t\t"<<CUBE[UP][0] << " "<< CUBE[UP][1]     << " "<< CUBE[UP][2]<<std::endl;
+		std::cout<<"\t\t\t"<<CUBE[UP][3] << " "<< CUBE[UP][4] 	<< " "<< CUBE[UP][5]<<std::endl;
+		std::cout<<"\t\t\t"<<CUBE[UP][6] << " "<< CUBE[UP][7] 	<< " "<< CUBE[UP][8]<<std::endl<<std::endl;
+
+		std::cout<<CUBE[LEFT][0] 	<< " "<< CUBE[LEFT][1] 	<< " "<< CUBE[LEFT][2] <<"\t";
+		std::cout<<CUBE[FRONT][0] 	<< " "<< CUBE[FRONT][1] 	<< " "<< CUBE[FRONT][2] <<"\t";
+		std::cout<<CUBE[RIGHT][0] 	<< " "<< CUBE[RIGHT][1] 	<< " "<< CUBE[RIGHT][2] <<"\t";
+		std::cout<<"   "<<CUBE[BACK][0] 	<< " "<< CUBE[BACK][1] 	<< " "<< CUBE[BACK][2]<<std::endl;
+
+		std::cout<<CUBE[LEFT][3] 	<< " "<< CUBE[LEFT][4] 	<< " "<< CUBE[LEFT][5] <<"\t";
+		std::cout<<CUBE[FRONT][3] 	<< " "<< CUBE[FRONT][4] 	<< " "<< CUBE[FRONT][5] <<"\t";
+		std::cout<<CUBE[RIGHT][3] 	<< " "<< CUBE[RIGHT][4] 	<< " "<< CUBE[RIGHT][5] <<"\t";
+		std::cout<<CUBE[BACK][3] 	<< " "<< CUBE[BACK][4] 	<< " "<< CUBE[BACK][5]<<"\t"<<std::endl;
+
+		std::cout<<CUBE[LEFT][6] 	<< " "<< CUBE[LEFT][7] 	<< " "<< CUBE[LEFT][8] <<"\t";
+		std::cout<<CUBE[FRONT][6] 	<< " "<< CUBE[FRONT][7] 	<< " "<< CUBE[FRONT][8] <<"\t";
+		std::cout<<CUBE[RIGHT][6] 	<< " "<< CUBE[RIGHT][7] 	<< " "<< CUBE[RIGHT][8] <<"\t";
+		std::cout<<CUBE[BACK][6] 	<< " "<< CUBE[BACK][7] 	<< " "<< CUBE[BACK][8]<<std::endl<<std::endl;
+
+		std::cout<<"\t\t\t"<<CUBE[DOWN][0] << " "<< CUBE[DOWN][1] << " "<< CUBE[DOWN][2]<<std::endl;
+		std::cout<<"\t\t\t"<<CUBE[DOWN][3] << " "<< CUBE[DOWN][4] << " "<< CUBE[DOWN][5]<<std::endl;
+		std::cout<<"\t\t\t"<<CUBE[DOWN][6] << " "<< CUBE[DOWN][7] << " "<< CUBE[DOWN][8]<<std::endl;
+}/**/
 
 void move(int SIDE){//Clockwise Turn
 	int temp = 	   CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]];
@@ -346,22 +409,28 @@ void rotation(int _int){
 		std::cout<<"ROTATION CALLED BUT NOT APPLIED"<<std::endl;
 }
 
-void rotationX(){//GOOD
+void rotateSingleFaceI(int SIDE){
+	rotateSingleFace2(SIDE);
+	rotateSingleFace(SIDE);
+}
+void rotateSingleFace2(int SIDE){
+	rotateSingleFace(SIDE);
+	rotateSingleFace(SIDE);
+}
+
+void rotationX(){ //GOOD
 	int temp[9];
 	for(int i = 0; i<NUM_STICKERS; i++){
 		temp[i]=CUBE[FRONT][i];
-
-		CUBE[FRONT][i]=CUBE[DOWN][i];
-		CUBE[DOWN][i]=CUBE[BACK][i];
-		CUBE[BACK][i]=CUBE[UP][i];
-		CUBE[UP][i]=temp[i];
+		CUBE[FRONT][i] = CUBE[DOWN][i];
+		CUBE[DOWN][i] = CUBE[BACK][i];
+		CUBE[BACK][i] = CUBE[UP][i];
+		CUBE[UP][i] = temp[i];
 	}
-	rotateSingleFace(BACK);
-	rotateSingleFace(BACK);
+	rotateSingleFace2(BACK);
+	rotateSingleFace2(DOWN);
 	rotateSingleFace(RIGHT);
-	rotateSingleFace(OPPISITESIDE[RIGHT]);//TO ROTATE IT CLOCKWISE
-	rotateSingleFace(OPPISITESIDE[RIGHT]);
-	rotateSingleFace(OPPISITESIDE[RIGHT]);
+	rotateSingleFaceI(OPPISITESIDE[RIGHT]);//TO ROTATE IT CLOCKWISE
 	std::cout<<std::endl<<"Rotation X"<<std::endl;
 	print();
 }
@@ -374,12 +443,8 @@ void rotationY(){//GOOD
 		CUBE[BACK][i]=CUBE[LEFT][i];
 		CUBE[LEFT][i]=temp[i];
 	}
-	//rotateSingleFace(DOWN);
-	//rotateSingleFace(DOWN);
 	rotateSingleFace(UP);
-	rotateSingleFace(OPPISITESIDE[UP]);//TO ROTATE IT CLOCKWISE
-	//rotateSingleFace(OPPISITESIDE[UP]);
-	//rotateSingleFace(OPPISITESIDE[UP]);//I am going to figure out why this dosn't need a second one
+	rotateSingleFaceI(OPPISITESIDE[UP]);//TO ROTATE IT CLOCKWISE
 	std::cout<<std::endl<<"Rotation Y"<<std::endl;
 	print();
 }
@@ -396,11 +461,8 @@ void rotationZ(){//GOOD
 	rotateSingleFace(LEFT);
 	rotateSingleFace(DOWN);
 	rotateSingleFace(RIGHT);
-
 	rotateSingleFace(FRONT); //This is the original side I am rotating
-	rotateSingleFace(OPPISITESIDE[FRONT]);
-	rotateSingleFace(OPPISITESIDE[FRONT]);
-	rotateSingleFace(OPPISITESIDE[FRONT]);
+	rotateSingleFaceI(OPPISITESIDE[FRONT]);
 	std::cout<<std::endl<<"Rotation Z"<<std::endl;
 	print();
 }
@@ -466,27 +528,6 @@ std::string replaceText(std::string str){
 	std::replace( str.begin(), str.end(), '\'', 'i');
 	return str;
 }//This gets rid of spaces and replaces ' with i (this stands of prime)
-
-void print(){
-		std::cout<<"\t"<<_CHAR[CUBE[UP][0]] << _CHAR[CUBE[UP][1]] << _CHAR[CUBE[UP][2]]<<std::endl;
-		std::cout<<"\t"<<_CHAR[CUBE[UP][3]] << _CHAR[CUBE[UP][4]] << _CHAR[CUBE[UP][5]]<<std::endl;
-		std::cout<<"\t"<<_CHAR[CUBE[UP][6]] << _CHAR[CUBE[UP][7]] << _CHAR[CUBE[UP][8]]<<std::endl<<std::endl;
-		std::cout<<_CHAR[CUBE[LEFT][0]] << _CHAR[CUBE[LEFT][1]] << _CHAR[CUBE[LEFT][2]] <<"\t";
-		std::cout<<_CHAR[CUBE[FRONT][0]] << _CHAR[CUBE[FRONT][1]] << _CHAR[CUBE[FRONT][2]] <<"\t";
-		std::cout<<_CHAR[CUBE[RIGHT][0]] << _CHAR[CUBE[RIGHT][1]] << _CHAR[CUBE[RIGHT][2]] <<"\t";
-		std::cout<<_CHAR[CUBE[BACK][0]] << _CHAR[CUBE[BACK][1]] << _CHAR[CUBE[BACK][2]]<<std::endl;
-		std::cout<<_CHAR[CUBE[LEFT][3]] << _CHAR[CUBE[LEFT][4]] << _CHAR[CUBE[LEFT][5]] <<"\t";
-		std::cout<<_CHAR[CUBE[FRONT][3]] << _CHAR[CUBE[FRONT][4]] << _CHAR[CUBE[FRONT][5]] <<"\t";
-		std::cout<<_CHAR[CUBE[RIGHT][3]] << _CHAR[CUBE[RIGHT][4]] << _CHAR[CUBE[RIGHT][5]] <<"\t";
-		std::cout<<_CHAR[CUBE[BACK][3]] << _CHAR[CUBE[BACK][4]] << _CHAR[CUBE[BACK][5]]<<std::endl;
-		std::cout<<_CHAR[CUBE[LEFT][6]] << _CHAR[CUBE[LEFT][7]] << _CHAR[CUBE[LEFT][8]] <<"\t";
-		std::cout<<_CHAR[CUBE[FRONT][6]] << _CHAR[CUBE[FRONT][7]] << _CHAR[CUBE[FRONT][8]] <<"\t";
-		std::cout<<_CHAR[CUBE[RIGHT][6]] << _CHAR[CUBE[RIGHT][7]] << _CHAR[CUBE[RIGHT][8]] <<"\t";
-		std::cout<<_CHAR[CUBE[BACK][6]] << _CHAR[CUBE[BACK][7]] << _CHAR[CUBE[BACK][8]]<<std::endl<<std::endl;
-		std::cout<<"\t"<<_CHAR[CUBE[DOWN][0]] << _CHAR[CUBE[DOWN][1]] << _CHAR[CUBE[DOWN][2]]<<std::endl;
-		std::cout<<"\t"<<_CHAR[CUBE[DOWN][3]] << _CHAR[CUBE[DOWN][4]] << _CHAR[CUBE[DOWN][5]]<<std::endl;
-		std::cout<<"\t"<<_CHAR[CUBE[DOWN][6]] << _CHAR[CUBE[DOWN][7]] << _CHAR[CUBE[DOWN][8]]<<std::endl;
-}
 
 void initilize(){
 	for (int x = 0; x<NUM_FACES; x++)
