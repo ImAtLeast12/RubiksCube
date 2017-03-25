@@ -11,14 +11,13 @@
 
 //char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
 char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
-
 //char _CHAR[6][2] = {"G","O","W","R","B","Y"};//MY CUBE
 
-char FACE_NAME [6][20] = {"A","B","C","D","E","F"};
+//char FACE_NAME [6][20] = {"A","B","C","D","E","F"};
 						// ?   x	x	?	?	?					
 
 
-//char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
+char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
 
 int OPPISITESIDE[6] = {4,3,5,1,0,2};
 enum FACES{LEFT, BACK, UP, FRONT, RIGHT, DOWN};
@@ -166,19 +165,42 @@ int zCorner(int position){
 void solveFirstLayerCorners(){//I ONLY WANT TO PUT THE CORNERS IN THE CORRECT POSITIONS I DON'T CARE ABOUT ORIENTATION
 	std::cout<<"FIRST CORNERS"<<std::endl;
 
+	//when i solve for the coners I am looking at [up][8] 
+	//if the up 8 coner has white then I will look at down 2
 
+	//if down 2 has a colror that has white then I will rotate down
+	//if the up 8 coner has white then I will look at down 2
+	//repeat till not true
 
-	//So the first thing that I am going to do is look for a white corner piece in the top row
 	int tempX,tempY, tempZ;
+	for (int i = 0; i<4; i++){
+		if (xCorner(4) == CUBE[UP][CENTER] || yCorner(4) == CUBE[UP][CENTER] || zCorner(4) == CUBE[UP][CENTER]){ //if any of these cublets are white
+			//then check if down 2 has a white piece
+			do{
+				move(DOWN);
+				tempX = xCorner(5);
+				tempY = yCorner(5);
+				tempZ = zCorner(5);
+			}while(tempX == CUBE[UP][CENTER] || tempY == CUBE[UP][CENTER] || tempZ == CUBE[UP][CENTER]); //keep going until white is freed
+			comands("R' D' R D");
+		}
+		move(UP);
+	}//SO NOW I HAVE WHITE ALL ON THE BOTTOM
+	//THE REASON THAT I AM DOING IT THIS WAY IS SO THAT I DON'T HAVE TO COMPARE FOR STATES OF PARODY
+
+
+
 	
-	for (int i = 0; i < 8; i++){ //This will only check for the UP pieces
-			tempX = xCorner(i);
-			tempY = yCorner(i);
-			tempZ = zCorner(i);
-			if(tempX == CUBE[UP][4] || tempY == CUBE[UP][4] || tempZ == CUBE[UP][4]) //IF ONE OF THESE PIECES ARE WHITE THEN THIS WILL TRIGGER		
-				std::cout<<"FOUND WHITE PIECE AT "<<std::endl << FACE_NAME[tempX] <<std::endl <<FACE_NAME[tempY]<<std::endl<<FACE_NAME[tempZ]<<std::endl<<std::endl;
-				//XX, YY, ZZ
-	}
+
+
+
+
+	//THE NEXT STEP IS GOING TO PUT THE WHITE CUBES BACK WHERE THEY NEED TO BE
+	//
+}
+
+	
+
 
 	//SO IF Z
 
@@ -210,7 +232,7 @@ void solveFirstLayerCorners(){//I ONLY WANT TO PUT THE CORNERS IN THE CORRECT PO
 	//I will then have to orientate them using the corner flip method
 
 	//mabey have a check corner function 
-}
+
 
 void solveCross(){
 	for(int i = 0; i<4; i++){
@@ -239,7 +261,7 @@ void makeCross(){
 		int targetPosition 	= targetEdgeCubeY();
 		std::cout<<"PRINT TARGET"<<FACE_NAME[targetSide]<<"\t"<<targetPosition<<std::endl;
 
-		for (int i = 0; (i<4 and (CUBE[targetSide][5]!=CUBE[UP][4])); i++)
+		for (int i = 0; (i<4 and (CUBE[targetSide][5]!=CUBE[UP][CENTER])); i++)
 			move(targetSide);			
 		
 		if(targetSide==LEFT){ //Depending on what the target side was I need to put it in the CUBE[UP][5] position
@@ -278,7 +300,7 @@ int targetEdgeCubeY(){
 		for (int y=1; y <NUM_STICKERS; y+=2){
 			if(x != UP){
 				//Look for it as long as it isn't looking at the UP face
-				if(CUBE[x][y]==CUBE[UP][4]){
+				if(CUBE[x][y]==CUBE[UP][CENTER]){
 					//This is the target
 					//return (x and y);
 					//return std::make_tuple(x, y);
@@ -296,7 +318,7 @@ int targetEdgeCubeX(){
 		for (int y=1; y <NUM_STICKERS; y+=2){
 			if(x != UP){
 				//Look for it as long as it isn't looking at the UP face
-				if(CUBE[x][y]==CUBE[UP][4]){
+				if(CUBE[x][y]==CUBE[UP][CENTER]){
 					//This is the target
 					//return (x and y);
 					//return std::make_tuple(x, y);
@@ -437,7 +459,7 @@ void rotateSingleFace2(int SIDE){
 }
 
 void rotationX(){ //GOOD
-	int temp[9];
+	int temp[NUM_STICKERS];
 	for(int i = 0; i<NUM_STICKERS; i++){
 		temp[i]=CUBE[FRONT][i];
 		CUBE[FRONT][i] = CUBE[DOWN][i];
@@ -453,7 +475,7 @@ void rotationX(){ //GOOD
 	print();
 }
 void rotationY(){//GOOD
-	int temp[9];
+	int temp[NUM_STICKERS];
 	for(int i = 0; i<NUM_STICKERS; i++){
 		temp[i]=CUBE[FRONT][i];
 		CUBE[FRONT][i]=CUBE[RIGHT][i];
@@ -467,7 +489,7 @@ void rotationY(){//GOOD
 	print();
 }
 void rotationZ(){//GOOD
-	int temp[9];
+	int temp[NUM_STICKERS];
 	for(int i = 0; i<NUM_STICKERS; i++){
 		temp[i]=CUBE[UP][i];
 		CUBE[UP][i]=CUBE[LEFT][i];
