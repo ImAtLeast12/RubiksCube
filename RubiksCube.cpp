@@ -1,20 +1,31 @@
+//https://www.youtube.com/watch?v=1t1OL2zN0LQ		//THIS IS THE VIDEO THAT I AM USING FOR THE ALGORITHMS
+
 #include <iostream>
 #include <string>
 #include <algorithm>
 #include <tuple>
-//#include <stdexcept>
 
 #define NUM_FACES 6
 #define NUM_STICKERS 9
 
-//char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
-//char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
-char _CHAR[6][2] = {"G","O","W","R","B","Y"};//MY CUBE
 
-char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
+//char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
+char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
+
+//char _CHAR[6][2] = {"G","O","W","R","B","Y"};//MY CUBE
+
+char FACE_NAME [6][20] = {"A","B","C","D","E","F"};
+						// ?   x	x	?	?	?					
+
+
+//char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
+
 int OPPISITESIDE[6] = {4,3,5,1,0,2};
-enum FACES{LEFT,BACK,UP,FRONT,RIGHT,DOWN};
+enum FACES{LEFT, BACK, UP, FRONT, RIGHT, DOWN};
 enum COLORS{GREEN, ORANGE, WHITE, RED, BLUE, YELLOW};
+enum CUBELETS{	TOP_LEFT, 	 TOP_CENTER, 	TOP_RIGHT,
+				CENTER_LEFT, CENTER, 		CENTER_RIGHT,
+				BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT,}; //WHEN I WANT TO CALL A CUBELET OF A CUBE I WILL USE THESE
 
 int ATMV[6][16] = {		{UP,BACK,DOWN,FRONT,	0,3,6,8,5,2,0,3,6,0,3,6		},//LEFT
 						{UP,RIGHT,DOWN,LEFT,	0,1,2,2,5,8,8,7,6,6,3,0		},//BACK
@@ -25,76 +36,72 @@ int ATMV[6][16] = {		{UP,BACK,DOWN,FRONT,	0,3,6,8,5,2,0,3,6,0,3,6		},//LEFT
 
 int CUBE [NUM_FACES][NUM_STICKERS];
 
-
-
-
-/*STAR/int CUBE[NUM_FACES][NUM_STICKERS] =  {{0,1,2,3,4,5,6,7,8},
-									{9,10,11,12,13,14,15,16,17},
-									{18,19,20,21,22,23,24,25,26},
-									{27,28,29,30,31,32,33,34,35},
-									{36,37,38,39,40,41,42,43,44},
-									{45,46,47,48,49,50,51,52,53}};
-//This is just for testing purpouses/**/
-
-
-
-
-
 char VALID_TWO_CHAR_COMMANDS[12][3] = {"Li","L2","Bi","B2","Ui","U2","Fi","F2","Ri","R2","Di","D2"};
 char VALID_ONE_CHAR_COMMANDS[6][2] = {"L","B","U","F","R","D"};
 
 //METHODS
 void initilize();		//INITILIZES THE CUBE
 void print(); 			//PRINTS THE CUBE
+
+//ALL OF THESE ARE FOR A MOVEMENT FOR A SIDE GIVEN
 void move(int SIDE);	//DOES A MOVE CLOCKWISE
 void move2(int SIDE);	//DOES A MOVE TWICE
 void moveI(int SIDE);	//DOES A MOVE COUNTER CLOCKWISE
+
+//ALL OF THESE ARE FOR THE COMANDS
 void comands(std::string str); 
+std::string replaceText(std::string str);
+
+//ALL OF THESE ARE FOR ROTATIONS
 void rotateSingleFace(int SIDE);
+void rotateSingleFace2(int SIDE);
+void rotateSingleFaceI(int SIDE);
 void rotation(int _int);
 void rotation(std::string _str);
-
+void rotationX();
+void rotationY();
+void rotationZ();
 void rotationI(int SIDE);
 void rotation2(int SIDE);
 void rotationI(std::string SIDE);
 void rotation2(std::string SIDE);
 
-std::string replaceText(std::string str);
-
-void rotationX();
-void rotationY();
-void rotationZ();
-
-void rotateSingleFace2(int SIDE);
+//ALL OF THESE ARE FOR THE AI
 bool checkFaceAllSame();
 bool doesSideHaveCross(int SIDE);
-//std::tuple<int,int> targetEdgeCube();
-int targetEdgeCubeX();
-int targetEdgeCubeY();
-
+int targetEdgeCubeX();//I WANT THIS TO BE A TUPLE INSTEAD OF 2 FUNCTIONS 
+int targetEdgeCubeY();//BUT IT STILL WORKS 
 bool checkCross(int SIDE);
 void makeCross();
 void solveCross();
+void solveFirstLayerCorners();
 
-void rotateSingleFaceI(int SIDE);
-void solveSecondLayer();
+
+int xCorner(int position);
+int yCorner(int position);
+int zCorner(int position);
+
+int CORNERS[8][3] = {{0,0,0},
+					{0,0,0},
+					{0,0,0},
+					{0,0,0},
+					{0,0,0},
+					{0,0,0},
+					{0,0,0},
+					{0,0,0}};
+
+void updateCorners();
 
 
 int main(){
-	/*THIS IS FOR THE TESTING THAT HAS ALL OF THE INTEGERS PUT A STAR HERE/
-	print();
-	rotationX();/**/
-
-
-	/*PUT STAR HERE*/
 	initilize();
-	comands("U' F B2 D R2 L B' D U B U2 B2 F U' L2 B L D' B L R' F2 U' D B'");
+	comands("L U' D' F B' L2 B2 L' U2 R U2 B R B' F' D B L D' R L F R D' B");
 	makeCross();
-	std::cout<<std::endl;
-	print();
+	//std::cout<<std::endl;
+	//print();
 
-	//comands("B2 L2 F2 R2");
-	solveCross();/*This seams to be working*/
+	solveCross();
+	solveFirstLayerCorners();
 
 	//The next thing I need to do is solve the second layer doing this involves a couple algoritms that can be placed easily
 	//I am also going to have to put the yellow side face up
@@ -108,15 +115,101 @@ int main(){
 	//I CAN HAVE ONE FOR EDGE PIECES AND ONE FOR CORNER PIECES
 	//I am going to actually start out will the easiest one which is the last algoritm
 	//The only problem since I made the algorithm I will have to recreate it	
+
+
+
+
 	return 0;
 }
 
 
-void solveSecondLayer(){
-	//FIRST THING I NEED TO DO IS FLIP THE CUBE SO THAT THE YELLOW FACE IS ON TOP
-	rotation("Z");
-	rotation("Z");
 
+
+
+int xCorner(int position){//I WOULD LIKE TO CHANGE THIS TO A TUPLE LATER
+	int CORNERS [8][3] = {{CUBE[LEFT][2],		CUBE[FRONT][0],		CUBE[UP][6]},
+							{CUBE[LEFT][8],		CUBE[FRONT][6],		CUBE[DOWN][0]},
+							{CUBE[LEFT][0],		CUBE[BACK][2],		CUBE[UP][0]},
+							{CUBE[LEFT][6],		CUBE[BACK][8],		CUBE[DOWN][6]},
+							{CUBE[RIGHT][0],	CUBE[FRONT][2],		CUBE[UP][8]},
+							{CUBE[RIGHT][6],	CUBE[FRONT][8],		CUBE[DOWN][2]},
+							{CUBE[RIGHT][2],	CUBE[BACK][0],		CUBE[UP][2]},
+							{CUBE[RIGHT][8],	CUBE[BACK][6],		CUBE[DOWN][8]}};
+	return CORNERS[position][0];
+}
+
+
+int yCorner(int position){
+	int CORNERS [8][3] = {{CUBE[LEFT][2],		CUBE[FRONT][0],		CUBE[UP][6]},
+							{CUBE[LEFT][8],		CUBE[FRONT][6],		CUBE[DOWN][0]},
+							{CUBE[LEFT][0],		CUBE[BACK][2],		CUBE[UP][0]},
+							{CUBE[LEFT][6],		CUBE[BACK][8],		CUBE[DOWN][6]},
+							{CUBE[RIGHT][0],	CUBE[FRONT][2],		CUBE[UP][8]},
+							{CUBE[RIGHT][6],	CUBE[FRONT][8],		CUBE[DOWN][2]},
+							{CUBE[RIGHT][2],	CUBE[BACK][0],		CUBE[UP][2]},
+							{CUBE[RIGHT][8],	CUBE[BACK][6],		CUBE[DOWN][8]}};
+	return CORNERS[position][1];
+}
+
+int zCorner(int position){
+	int CORNERS [8][3] = {{CUBE[LEFT][2],		CUBE[FRONT][0],		CUBE[UP][6]},
+							{CUBE[LEFT][8],		CUBE[FRONT][6],		CUBE[DOWN][0]},
+							{CUBE[LEFT][0],		CUBE[BACK][2],		CUBE[UP][0]},
+							{CUBE[LEFT][6],		CUBE[BACK][8],		CUBE[DOWN][6]},
+							{CUBE[RIGHT][0],	CUBE[FRONT][2],		CUBE[UP][8]},
+							{CUBE[RIGHT][6],	CUBE[FRONT][8],		CUBE[DOWN][2]},
+							{CUBE[RIGHT][2],	CUBE[BACK][0],		CUBE[UP][2]},
+							{CUBE[RIGHT][8],	CUBE[BACK][6],		CUBE[DOWN][8]}};
+	return CORNERS[position][2];
+}//I would also like to make these a tuple so it does everything all at once
+
+void solveFirstLayerCorners(){//I ONLY WANT TO PUT THE CORNERS IN THE CORRECT POSITIONS I DON'T CARE ABOUT ORIENTATION
+	std::cout<<"FIRST CORNERS"<<std::endl;
+
+
+
+	//So the first thing that I am going to do is look for a white corner piece in the top row
+	int tempX,tempY, tempZ;
+	
+	for (int i = 0; i < 8; i++){ //This will only check for the UP pieces
+			tempX = xCorner(i);
+			tempY = yCorner(i);
+			tempZ = zCorner(i);
+			if(tempX == CUBE[UP][4] || tempY == CUBE[UP][4] || tempZ == CUBE[UP][4]) //IF ONE OF THESE PIECES ARE WHITE THEN THIS WILL TRIGGER		
+				std::cout<<"FOUND WHITE PIECE AT "<<std::endl << FACE_NAME[tempX] <<std::endl <<FACE_NAME[tempY]<<std::endl<<FACE_NAME[tempZ]<<std::endl<<std::endl;
+				//XX, YY, ZZ
+	}
+
+	//SO IF Z
+
+
+
+
+
+	//comands("R' D' R D");//THIS IS WHAT I USE
+	//FIRST THING I AM GOING TO DO IS CHECK TO SEE IF THERE ARE ANY WHITE PIECES ON THE TOP OR NOT
+	//I WANT TO PUT ALL OF THE WHITE PIECES FROM THE TOP TO THE BOTTOM 
+	//THIS IS JUST SO THAT I DON'T HAVE PARODY ERRORS MAKING IT EASIER FOR MY SELF
+
+
+
+
+
+
+
+	//This puts the [UP][8] to [DOWN][2] 
+	//6 repititions will put the cube in the original state
+
+
+
+
+
+
+
+	//to do this I will have to pull all of the white corners up
+	//I will then have to orientate them using the corner flip method
+
+	//mabey have a check corner function 
 }
 
 void solveCross(){
@@ -126,7 +219,7 @@ void solveCross(){
 	}//THIS MAKES DAISY
 
 	for(int i = 0; i<4; i++){//I NEED TO PULL 4 PEICES UP
-		while(CUBE[FRONT][7]!=CUBE[FRONT][4]){ //IF THEY MATCH THE MIDDLE AND THE BOTTOM
+		while(CUBE[FRONT][7]!=CUBE[FRONT][CENTER]){ //IF THEY MATCH THE MIDDLE AND THE BOTTOM
 			move(DOWN);
 			rotation(1);
 		}
@@ -136,54 +229,21 @@ void solveCross(){
 }
 
 void makeCross(){
-//Well the first, instead of checking for a cross, I should just make the cross for the UP face.
+	//Well the first, instead of checking for a cross, I should just make the cross for the UP face.
 	//to do that I should make a temp of the top side
 	//while(not doesSideHaveCross(UP)){//If the up side isn't solved yet then keep trying
 	//for (int loops = 0; (loops<=200) and (not doesSideHaveCross(UP)) ; loops++){
+
 	while(not doesSideHaveCross(UP)){ //this prevents infinit loops 		I am not sure how many loops it needs to be definite though
-
-		//[0,1,2]
-		//[3,4,5]
-		//[6,7,8]
-
-		/*
-						to make a cross is quite simple
-			check 		first you need to check that you don't have a cross on the face that you are working on
-									if you do have a check then you can end the function
-						else continue
-
-
-						then next thing that you need to work on is targeting a cubelet that you need
-									you need to have a cubelet that is the same color as UP's middle position
-									You will target what side it is on, and what position it is at
-
-						the next thing that you will need to work on is bringing the cublets to the space that they need
-									rotate the side so that it is in the 5th position
-
-
-		*/
-
-
-
-		
-
 		int targetSide 		= targetEdgeCubeX(); //I would like to make this a tuple when I can figure that out other wise this will have to do
 		int targetPosition 	= targetEdgeCubeY();
 		std::cout<<"PRINT TARGET"<<FACE_NAME[targetSide]<<"\t"<<targetPosition<<std::endl;
 
-
-
-		//while(CUBE[targetSide][5]!=CUBE[UP][4])//This says if cube position 5 is equal to white then 
-		//	move(targetSide); //move the target side
-
 		for (int i = 0; (i<4 and (CUBE[targetSide][5]!=CUBE[UP][4])); i++)
 			move(targetSide);			
 		
-
-		if(targetSide==LEFT){//THIS RELIES ON THE ASSUMPTION THAT THE PREVIOUS WHILE WORKED AND THE POSITION OF THE TARGET IS IN THE TARGETS SIDE AND IN THE 5TH POSITION
-			rotation(1);
-			rotation(1);
-			rotation(1);
+		if(targetSide==LEFT){ //Depending on what the target side was I need to put it in the CUBE[UP][5] position
+			rotationI(1);
 			move(UP);
 			move(RIGHT);
 		}
@@ -196,14 +256,12 @@ void makeCross(){
 			move(RIGHT);
 		}
 		else if (targetSide == BACK){
-			rotation(1);
-			rotation(1);
+			rotation2(1);
 			move2(UP);
 			move(RIGHT);
 		}
 		else if (targetSide==DOWN){
-			move(RIGHT);
-			move(RIGHT);
+			move2(RIGHT);
 		}
 		moveI(UP);
 
@@ -212,42 +270,6 @@ void makeCross(){
 		//move(x) until target is in 5th
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-void rotationI(int SIDE){
-	rotation2(SIDE);
-	rotation(SIDE);
-}
-void rotation2(int SIDE){
-	rotation(SIDE);
-	rotation(SIDE);
-}
-
-void rotationI(std::string SIDE){
-	rotation2(SIDE);
-	rotation(SIDE);
-}
-void rotation2(std::string SIDE){
-	rotation(SIDE);
-	rotation(SIDE);
-}
-
-
-
-
-
-
 
 int targetEdgeCubeY(){
 	//I want to target a piece that I want on the cube
@@ -286,11 +308,6 @@ int targetEdgeCubeX(){
 	return -1;
 }
 
-
-
-
-
-
 bool doesSideHaveCross(int SIDE){
 	for (int y = 1; y<NUM_STICKERS-2; y+=2){
 		if(CUBE[SIDE][0+y]!=CUBE[SIDE][2+y]){
@@ -299,8 +316,6 @@ bool doesSideHaveCross(int SIDE){
 	}	
 	return true;	
 }
-
-
 
 bool checkFaceAllSame(){
 	for(int x = 0;x<NUM_FACES;x++){
@@ -340,31 +355,16 @@ void print(){
 		std::cout<<"\t"<<_CHAR[CUBE[DOWN][6]] << _CHAR[CUBE[DOWN][7]] << _CHAR[CUBE[DOWN][8]]<<std::endl;
 }
 
-/* THIS ONE IS FOR NUMBERS PUT STAR/
-void print(){
-		std::cout<<"\t\t\t"<<CUBE[UP][0] << " "<< CUBE[UP][1]     << " "<< CUBE[UP][2]<<std::endl;
-		std::cout<<"\t\t\t"<<CUBE[UP][3] << " "<< CUBE[UP][4] 	<< " "<< CUBE[UP][5]<<std::endl;
-		std::cout<<"\t\t\t"<<CUBE[UP][6] << " "<< CUBE[UP][7] 	<< " "<< CUBE[UP][8]<<std::endl<<std::endl;
+void moveI(int SIDE){//Counter Clockwise Trun
+	move(SIDE);
+ 	move(SIDE);
+ 	move(SIDE);
+}
 
-		std::cout<<CUBE[LEFT][0] 	<< " "<< CUBE[LEFT][1] 	<< " "<< CUBE[LEFT][2] <<"\t";
-		std::cout<<CUBE[FRONT][0] 	<< " "<< CUBE[FRONT][1] 	<< " "<< CUBE[FRONT][2] <<"\t";
-		std::cout<<CUBE[RIGHT][0] 	<< " "<< CUBE[RIGHT][1] 	<< " "<< CUBE[RIGHT][2] <<"\t";
-		std::cout<<"   "<<CUBE[BACK][0] 	<< " "<< CUBE[BACK][1] 	<< " "<< CUBE[BACK][2]<<std::endl;
-
-		std::cout<<CUBE[LEFT][3] 	<< " "<< CUBE[LEFT][4] 	<< " "<< CUBE[LEFT][5] <<"\t";
-		std::cout<<CUBE[FRONT][3] 	<< " "<< CUBE[FRONT][4] 	<< " "<< CUBE[FRONT][5] <<"\t";
-		std::cout<<CUBE[RIGHT][3] 	<< " "<< CUBE[RIGHT][4] 	<< " "<< CUBE[RIGHT][5] <<"\t";
-		std::cout<<CUBE[BACK][3] 	<< " "<< CUBE[BACK][4] 	<< " "<< CUBE[BACK][5]<<"\t"<<std::endl;
-
-		std::cout<<CUBE[LEFT][6] 	<< " "<< CUBE[LEFT][7] 	<< " "<< CUBE[LEFT][8] <<"\t";
-		std::cout<<CUBE[FRONT][6] 	<< " "<< CUBE[FRONT][7] 	<< " "<< CUBE[FRONT][8] <<"\t";
-		std::cout<<CUBE[RIGHT][6] 	<< " "<< CUBE[RIGHT][7] 	<< " "<< CUBE[RIGHT][8] <<"\t";
-		std::cout<<CUBE[BACK][6] 	<< " "<< CUBE[BACK][7] 	<< " "<< CUBE[BACK][8]<<std::endl<<std::endl;
-
-		std::cout<<"\t\t\t"<<CUBE[DOWN][0] << " "<< CUBE[DOWN][1] << " "<< CUBE[DOWN][2]<<std::endl;
-		std::cout<<"\t\t\t"<<CUBE[DOWN][3] << " "<< CUBE[DOWN][4] << " "<< CUBE[DOWN][5]<<std::endl;
-		std::cout<<"\t\t\t"<<CUBE[DOWN][6] << " "<< CUBE[DOWN][7] << " "<< CUBE[DOWN][8]<<std::endl;
-}/**/
+void move2(int SIDE){//2 Turns
+ 	move(SIDE);
+ 	move(SIDE);
+}
 
 void move(int SIDE){//Clockwise Turn
 	int temp = 	   CUBE[ATMV[SIDE][0]][ATMV[SIDE][4]];
@@ -385,6 +385,24 @@ void move(int SIDE){//Clockwise Turn
 	std::cout<<std::endl<<FACE_NAME[SIDE]<<std::endl;
 	rotateSingleFace(SIDE);
 	print();
+}
+
+void rotationI(int SIDE){
+	rotation2(SIDE);
+	rotation(SIDE);
+}
+void rotation2(int SIDE){
+	rotation(SIDE);
+	rotation(SIDE);
+}
+
+void rotationI(std::string SIDE){
+	rotation2(SIDE);
+	rotation(SIDE);
+}
+void rotation2(std::string SIDE){
+	rotation(SIDE);
+	rotation(SIDE);
 }
 
 void rotation(std::string _str){//These rotation functions are now what I want but they will work for now
@@ -467,17 +485,6 @@ void rotationZ(){//GOOD
 	print();
 }
 
-void moveI(int SIDE){//Counter Clockwise Trun
-	move(SIDE);
- 	move(SIDE);
- 	move(SIDE);
-}
-
-void move2(int SIDE){//2 Turns
- 	move(SIDE);
- 	move(SIDE);
-}
-
 void rotateSingleFace(int SIDE){ //I am seperating this out because rotating the cube will need this
 	int temp = CUBE[SIDE][0]; 
 	CUBE[SIDE][0] = CUBE[SIDE][6];
@@ -534,3 +541,58 @@ void initilize(){
 		for (int y = 0; y<NUM_STICKERS; y++)
 			CUBE[x][y] = x;
 }
+
+
+
+/*STAR/int CUBE[NUM_FACES][NUM_STICKERS] =  {{0,1,2,3,4,5,6,7,8},
+									{9,10,11,12,13,14,15,16,17},
+									{18,19,20,21,22,23,24,25,26},
+									{27,28,29,30,31,32,33,34,35},
+									{36,37,38,39,40,41,42,43,44},
+									{45,46,47,48,49,50,51,52,53}};
+//PUT THIS ONE IN THE HEADER/**/
+
+/*THIS GOES IN THE MAIN STAR/
+print();
+rotationX();/**/
+/*PUT STAR HERE*/
+
+/* THIS ONE IS FOR NUMBERS PUT STAR/
+void print(){
+		std::cout<<"\t\t\t"<<CUBE[UP][0] << " "<< CUBE[UP][1]     << " "<< CUBE[UP][2]<<std::endl;
+		std::cout<<"\t\t\t"<<CUBE[UP][3] << " "<< CUBE[UP][4] 	<< " "<< CUBE[UP][5]<<std::endl;
+		std::cout<<"\t\t\t"<<CUBE[UP][6] << " "<< CUBE[UP][7] 	<< " "<< CUBE[UP][8]<<std::endl<<std::endl;
+
+		std::cout<<CUBE[LEFT][0] 	<< " "<< CUBE[LEFT][1] 	<< " "<< CUBE[LEFT][2] <<"\t";
+		std::cout<<CUBE[FRONT][0] 	<< " "<< CUBE[FRONT][1] 	<< " "<< CUBE[FRONT][2] <<"\t";
+		std::cout<<CUBE[RIGHT][0] 	<< " "<< CUBE[RIGHT][1] 	<< " "<< CUBE[RIGHT][2] <<"\t";
+		std::cout<<"   "<<CUBE[BACK][0] 	<< " "<< CUBE[BACK][1] 	<< " "<< CUBE[BACK][2]<<std::endl;
+
+		std::cout<<CUBE[LEFT][3] 	<< " "<< CUBE[LEFT][4] 	<< " "<< CUBE[LEFT][5] <<"\t";
+		std::cout<<CUBE[FRONT][3] 	<< " "<< CUBE[FRONT][4] 	<< " "<< CUBE[FRONT][5] <<"\t";
+		std::cout<<CUBE[RIGHT][3] 	<< " "<< CUBE[RIGHT][4] 	<< " "<< CUBE[RIGHT][5] <<"\t";
+		std::cout<<CUBE[BACK][3] 	<< " "<< CUBE[BACK][4] 	<< " "<< CUBE[BACK][5]<<"\t"<<std::endl;
+
+		std::cout<<CUBE[LEFT][6] 	<< " "<< CUBE[LEFT][7] 	<< " "<< CUBE[LEFT][8] <<"\t";
+		std::cout<<CUBE[FRONT][6] 	<< " "<< CUBE[FRONT][7] 	<< " "<< CUBE[FRONT][8] <<"\t";
+		std::cout<<CUBE[RIGHT][6] 	<< " "<< CUBE[RIGHT][7] 	<< " "<< CUBE[RIGHT][8] <<"\t";
+		std::cout<<CUBE[BACK][6] 	<< " "<< CUBE[BACK][7] 	<< " "<< CUBE[BACK][8]<<std::endl<<std::endl;
+
+		std::cout<<"\t\t\t"<<CUBE[DOWN][0] << " "<< CUBE[DOWN][1] << " "<< CUBE[DOWN][2]<<std::endl;
+		std::cout<<"\t\t\t"<<CUBE[DOWN][3] << " "<< CUBE[DOWN][4] << " "<< CUBE[DOWN][5]<<std::endl;
+		std::cout<<"\t\t\t"<<CUBE[DOWN][6] << " "<< CUBE[DOWN][7] << " "<< CUBE[DOWN][8]<<std::endl;
+}/**/
+
+
+/*void updateCorners(){
+	CORNERS = {{CUBE[LEFT][2],		CUBE[FRONT][0],		CUBE[UP][6]},
+				{CUBE[LEFT][8],		CUBE[FRONT][6],		CUBE[DOWN][0]},
+				{CUBE[LEFT][0],		CUBE[BACK][2],		CUBE[UP][0]},
+				{CUBE[LEFT][6],		CUBE[BACK][8],		CUBE[DOWN][6]},
+				{CUBE[RIGHT][0],	CUBE[FRONT][2],		CUBE[UP][8]},
+				{CUBE[RIGHT][6],	CUBE[FRONT][8],		CUBE[DOWN][2]},
+				{CUBE[RIGHT][2],	CUBE[BACK][0],		CUBE[UP][2]},
+				{CUBE[RIGHT][8],	CUBE[BACK][6],		CUBE[DOWN][0]}};
+}*/ //this keeps on saying unexpected identifyer I think it is beacuse cube is not initilized yet
+
+
