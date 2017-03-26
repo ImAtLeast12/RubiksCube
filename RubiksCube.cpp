@@ -94,33 +94,110 @@ void updateCorners();
 int Corner(int position, int xyz);
 
 
+void topPieceLeft();
+void topPieceRight();
+void secondLayer();
+
+bool isSecondLayerDone();
+bool doesEdgeHaveYellow();
+
 int main(){
 	initilize();
 	comands("L U' D' F B' L2 B2 L' U2 R U2 B R B' F' D B L D' R L F R D' B");
 	makeCross();
-	//std::cout<<std::endl;
-	//print();
-
 	solveCross();
 	solveFirstLayerCorners();
-
-	//The next thing I need to do is solve the second layer doing this involves a couple algoritms that can be placed easily
-	//I am also going to have to put the yellow side face up
-
-
-
-	//I need to pick a side to work on 
-	//For now my target will be the top
-	//STEP ONE: MAKE A CROSS 			//This will probably be the most difficult to solve
-	//A USEFULL METHOD THAT I CAN HAVE IS A TARGETING SYSTEM
-	//I CAN HAVE ONE FOR EDGE PIECES AND ONE FOR CORNER PIECES
-	//I am going to actually start out will the easiest one which is the last algoritm
-	//The only problem since I made the algorithm I will have to recreate it	
-
-
+	secondLayer();
+	//rotation2(0);
 
 
 	return 0;
+}
+void secondLayer(){
+	//the first thing that I need to do is turn the cube around
+	rotation2(0);
+	//I need to see if the edge piece has a yellow on it 
+	//If all of the pieces have yellow then I need to trade for one of the pieces that are not solved yet
+	//I have to solve for the respective colors
+
+	//comands("R U R' U'");	//Righty Alg
+	//comands("L' U' L U"); //Lefty Alg
+
+	//If you want it to go right
+	//U righty algo U Lefty alg
+	//comands("U R U R' U' L' U' L U");
+
+
+
+	//So now I have 2 algorithms that can either go left or right
+	//Now I just have to decide when to do that and how many times I need it to be done
+
+	int counter= 0;
+	while(not isSecondLayerDone()){
+		if (counter > 5){
+			//then I need to swap an edge with another to free it up
+			//Just make sure that it dosn't free a cubelet that is in the correct spot already
+			while(CUBE[FRONT][5]==CUBE[FRONT][CENTER]){
+				rotation(1);
+			}
+			topPieceRight();
+			counter = 0;
+		}
+	//for(int i = 0; i<20; i++){
+		if(not doesEdgeHaveYellow()){
+			//IF THE CUBELET DOSN'T HAVE YELLOW THEN
+				//SPIN UNTIL FRONT[CENTER] == FRONT[2]
+				while(CUBE[FRONT][1] != CUBE[FRONT][CENTER]){
+					moveI(UP);
+					rotation(1);
+				}//Do that until it is fine
+				//Then I am either going to go left or go right
+				if(CUBE[UP][7] == CUBE[LEFT][CENTER]){
+					topPieceLeft();
+					std::cout<<"TOP PIECE LEFT";
+				}
+				else{
+					topPieceRight();
+					std::cout<<"TOP PIECE RIGHT";
+				}
+		}
+		move(UP);
+		counter++;
+	}
+}
+
+bool doesEdgeHaveYellow(){
+	if(CUBE[FRONT][1] == CUBE[UP][CENTER] || CUBE[UP][7] == CUBE[UP][CENTER]){
+		return true;
+	}
+	return false;
+}
+
+bool isSecondLayerDone(){
+	if(	CUBE[FRONT][3]== CUBE[FRONT][CENTER] && CUBE[FRONT][CENTER] == CUBE[FRONT][5] &&
+		CUBE[RIGHT][3]== CUBE[RIGHT][CENTER] && CUBE[RIGHT][CENTER] == CUBE[RIGHT][5] &&
+		CUBE[BACK][3]== CUBE[BACK][CENTER] && CUBE[BACK][CENTER] == CUBE[BACK][5] &&
+		CUBE[LEFT][3]== CUBE[LEFT][CENTER] && CUBE[LEFT][CENTER] == CUBE[LEFT][5]){
+		return true;
+	}
+	return false;
+}
+
+void topPieceLeft(){
+	moveI(UP);
+	comands("L' U' L U"); //Lefty Alg
+	rotationI(1);
+	comands("R U R' U'");	//Righty Alg
+	rotation(1);
+}
+
+void topPieceRight(){
+	move(UP);
+	comands("R U R' U'");	//Righty Alg
+	rotation(1);
+	comands("L' U' L U"); //Lefty Alg
+	rotationI(1);
+
 }
 
 int Corner(int position, int xyz){ //this update the corners
@@ -183,56 +260,14 @@ void solveFirstLayerCorners(){//I ONLY WANT TO PUT THE CORNERS IN THE CORRECT PO
 			if ((CUBE[RIGHT][1] == tempCorner[0]) || (CUBE[RIGHT][1] == tempCorner[1])){  //IF THESE TWO MATCH THEN I WILL PUT THEM INBETWEEN
 				while(CUBE[UP][8]!=CUBE[UP][CENTER]){
 					comands("R' D' R D");
-					std::cout<<"SECOND LOOP: " << i<<std::endl;
 				} //THEN IT WILL MOVE ON TO THE NEXT PIECE ON THE BOTTOM
 			}
 		}	
 		rotation(1);
-		std::cout<<"END: " << i<<std::endl;
 	}
 	while(CUBE[FRONT][1]!=CUBE[FRONT][CENTER])
 		move(UP);
-	
 }
-	
-
-
-
-
-	
-
-
-	//SO IF Z
-
-
-
-
-
-	//comands("R' D' R D");//THIS IS WHAT I USE
-	//FIRST THING I AM GOING TO DO IS CHECK TO SEE IF THERE ARE ANY WHITE PIECES ON THE TOP OR NOT
-	//I WANT TO PUT ALL OF THE WHITE PIECES FROM THE TOP TO THE BOTTOM 
-	//THIS IS JUST SO THAT I DON'T HAVE PARODY ERRORS MAKING IT EASIER FOR MY SELF
-
-
-
-
-
-
-
-	//This puts the [UP][8] to [DOWN][2] 
-	//6 repititions will put the cube in the original state
-
-
-
-
-
-
-
-	//to do this I will have to pull all of the white corners up
-	//I will then have to orientate them using the corner flip method
-
-	//mabey have a check corner function 
-
 
 void solveCross(){
 	for(int i = 0; i<4; i++){
