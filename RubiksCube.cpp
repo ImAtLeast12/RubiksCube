@@ -16,7 +16,7 @@ char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scram
 //char FACE_NAME [6][20] = {"A","B","C","D","E","F"};
 						// ?   x	x	?	?	?					
 
-
+int tempCorner[2] = {0,0};
 char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
 
 int OPPISITESIDE[6] = {4,3,5,1,0,2};
@@ -176,12 +176,9 @@ void solveFirstLayerCorners(){//I ONLY WANT TO PUT THE CORNERS IN THE CORRECT PO
 	for (int i = 0; i<4; i++){
 		if (xCorner(4) == CUBE[UP][CENTER] || yCorner(4) == CUBE[UP][CENTER] || zCorner(4) == CUBE[UP][CENTER]){ //if any of these cublets are white
 			//then check if down 2 has a white piece
-			do{
+			do
 				move(DOWN);
-				tempX = xCorner(5);
-				tempY = yCorner(5);
-				tempZ = zCorner(5);
-			}while(tempX == CUBE[UP][CENTER] || tempY == CUBE[UP][CENTER] || tempZ == CUBE[UP][CENTER]); //keep going until white is freed
+			while(xCorner(5) == CUBE[UP][CENTER] || yCorner(5) == CUBE[UP][CENTER] || zCorner(5) == CUBE[UP][CENTER]); //keep going until white is freed
 			comands("R' D' R D");
 		}
 		move(UP);
@@ -189,15 +186,50 @@ void solveFirstLayerCorners(){//I ONLY WANT TO PUT THE CORNERS IN THE CORRECT PO
 	//THE REASON THAT I AM DOING IT THIS WAY IS SO THAT I DON'T HAVE TO COMPARE FOR STATES OF PARODY
 
 
+	//THE NEXT STEP IS GOING TO PUT THE WHITE CUBES BACK WHERE THEY NEED TO BE
+	//
 
+	for (int i = 0; i<4; i++){
+		for (int i = 0; i<4; i++){
+			tempX = xCorner(5);
+			tempY = yCorner(5);
+			tempZ = zCorner(5);
+		}//Now I need to get the colors that is not white
+		if(tempX == CUBE[UP][CENTER]){
+			tempCorner[0] = tempY;
+			tempCorner[1] = tempZ;
+		}
+		else if (tempY==CUBE[UP][CENTER]){
+			tempCorner[0]=tempX;
+			tempCorner[1]=tempZ;
+		}
+		else{
+			tempCorner[0] = tempX;
+			tempCorner[1]= tempY;
+		}
+
+
+		//temp corner is going to be the colors and orientation I need to put them
+		//So first look for tempCorner[0]'s spot then look for temp[1]'s spot 
+		if ((CUBE[FRONT][1] == tempCorner[0]) || (CUBE[FRONT][1] == tempCorner[1])){
+			if ((CUBE[RIGHT][1] == tempCorner[0]) || (CUBE[RIGHT][1] == tempCorner[1])){  //IF THESE TWO MATCH THEN I WILL PUT THEM INBETWEEN
+				comands("R' D' R D");
+				rotationI(1);
+				std::cout<<"I DID THE COMANDS MASTER: " << i<<std::endl;
+			}
+		}
+	}
+
+
+
+
+
+
+}
 	
 
 
 
-
-	//THE NEXT STEP IS GOING TO PUT THE WHITE CUBES BACK WHERE THEY NEED TO BE
-	//
-}
 
 	
 
