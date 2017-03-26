@@ -75,10 +75,11 @@ void makeCross();
 void solveCross();
 void solveFirstLayerCorners();
 
+/*
 
 int xCorner(int position);
 int yCorner(int position);
-int zCorner(int position);
+int zCorner(int position);*/
 
 int CORNERS[8][3] = {{0,0,0},
 					{0,0,0},
@@ -90,6 +91,7 @@ int CORNERS[8][3] = {{0,0,0},
 					{0,0,0}};
 
 void updateCorners();
+int Corner(int position, int xyz);
 
 
 int main(){
@@ -121,79 +123,44 @@ int main(){
 	return 0;
 }
 
-
-
-
-
-int xCorner(int position){//I WOULD LIKE TO CHANGE THIS TO A TUPLE LATER
-	int CORNERS [8][3] = {{CUBE[LEFT][2],		CUBE[FRONT][0],		CUBE[UP][6]},
-							{CUBE[LEFT][8],		CUBE[FRONT][6],		CUBE[DOWN][0]},
-							{CUBE[LEFT][0],		CUBE[BACK][2],		CUBE[UP][0]},
-							{CUBE[LEFT][6],		CUBE[BACK][8],		CUBE[DOWN][6]},
-							{CUBE[RIGHT][0],	CUBE[FRONT][2],		CUBE[UP][8]},
-							{CUBE[RIGHT][6],	CUBE[FRONT][8],		CUBE[DOWN][2]},
-							{CUBE[RIGHT][2],	CUBE[BACK][0],		CUBE[UP][2]},
-							{CUBE[RIGHT][8],	CUBE[BACK][6],		CUBE[DOWN][8]}};
-	return CORNERS[position][0];
+int Corner(int position, int xyz){ //this update the corners
+	CORNERS [0][0] = CUBE[LEFT][2]; 	CORNERS [0][1] = CUBE[FRONT][0]; 	CORNERS [0][2] = CUBE[UP][6];
+	CORNERS [1][0] = CUBE[LEFT][8]; 	CORNERS [1][1] = CUBE[FRONT][6]; 	CORNERS [1][2] = CUBE[DOWN][0];
+	CORNERS [2][0] = CUBE[LEFT][0]; 	CORNERS [2][1] = CUBE[BACK][2];  	CORNERS [2][2] = CUBE[UP][0];
+	CORNERS [3][0] = CUBE[LEFT][6]; 	CORNERS [3][1] = CUBE[BACK][8];  	CORNERS [3][2] = CUBE[DOWN][6];
+	CORNERS [4][0] = CUBE[RIGHT][0];	CORNERS [4][1] = CUBE[FRONT][2]; 	CORNERS [4][2] = CUBE[UP][8];
+	CORNERS [5][0] = CUBE[RIGHT][6]; 	CORNERS [5][1] = CUBE[FRONT][8]; 	CORNERS [5][2] = CUBE[DOWN][2];
+	CORNERS [6][0] = CUBE[RIGHT][2]; 	CORNERS [6][1] = CUBE[BACK][0]; 	CORNERS [6][2] = CUBE[UP][2];
+	CORNERS [7][0] = CUBE[RIGHT][8]; 	CORNERS [7][1] = CUBE[BACK][6]; 	CORNERS [7][2] = CUBE[DOWN][8];
+	return CORNERS[position][xyz];
 }
 
-
-int yCorner(int position){
-	int CORNERS [8][3] = {{CUBE[LEFT][2],		CUBE[FRONT][0],		CUBE[UP][6]},
-							{CUBE[LEFT][8],		CUBE[FRONT][6],		CUBE[DOWN][0]},
-							{CUBE[LEFT][0],		CUBE[BACK][2],		CUBE[UP][0]},
-							{CUBE[LEFT][6],		CUBE[BACK][8],		CUBE[DOWN][6]},
-							{CUBE[RIGHT][0],	CUBE[FRONT][2],		CUBE[UP][8]},
-							{CUBE[RIGHT][6],	CUBE[FRONT][8],		CUBE[DOWN][2]},
-							{CUBE[RIGHT][2],	CUBE[BACK][0],		CUBE[UP][2]},
-							{CUBE[RIGHT][8],	CUBE[BACK][6],		CUBE[DOWN][8]}};
-	return CORNERS[position][1];
-}
-
-int zCorner(int position){
-	int CORNERS [8][3] = {{CUBE[LEFT][2],		CUBE[FRONT][0],		CUBE[UP][6]},
-							{CUBE[LEFT][8],		CUBE[FRONT][6],		CUBE[DOWN][0]},
-							{CUBE[LEFT][0],		CUBE[BACK][2],		CUBE[UP][0]},
-							{CUBE[LEFT][6],		CUBE[BACK][8],		CUBE[DOWN][6]},
-							{CUBE[RIGHT][0],	CUBE[FRONT][2],		CUBE[UP][8]},
-							{CUBE[RIGHT][6],	CUBE[FRONT][8],		CUBE[DOWN][2]},
-							{CUBE[RIGHT][2],	CUBE[BACK][0],		CUBE[UP][2]},
-							{CUBE[RIGHT][8],	CUBE[BACK][6],		CUBE[DOWN][8]}};
-	return CORNERS[position][2];
-}//I would also like to make these a tuple so it does everything all at once
 
 void solveFirstLayerCorners(){//I ONLY WANT TO PUT THE CORNERS IN THE CORRECT POSITIONS I DON'T CARE ABOUT ORIENTATION
-	std::cout<<"FIRST CORNERS"<<std::endl;
-
 	//when i solve for the coners I am looking at [up][8] 
 	//if the up 8 coner has white then I will look at down 2
-
 	//if down 2 has a colror that has white then I will rotate down
 	//if the up 8 coner has white then I will look at down 2
 	//repeat till not true
-
 	int tempX,tempY, tempZ;
 	for (int i = 0; i<4; i++){
-		if (xCorner(4) == CUBE[UP][CENTER] || yCorner(4) == CUBE[UP][CENTER] || zCorner(4) == CUBE[UP][CENTER]){ //if any of these cublets are white
+		if (Corner(4,0) == CUBE[UP][CENTER] || Corner(4,1) == CUBE[UP][CENTER] || Corner(4,2) == CUBE[UP][CENTER]){ //if any of these cublets are white
 			//then check if down 2 has a white piece
 			do
 				move(DOWN);
-			while(xCorner(5) == CUBE[UP][CENTER] || yCorner(5) == CUBE[UP][CENTER] || zCorner(5) == CUBE[UP][CENTER]); //keep going until white is freed
+			while(Corner(5,0) == CUBE[UP][CENTER] || Corner(5,1) == CUBE[UP][CENTER] || Corner(5,2) == CUBE[UP][CENTER]); //keep going until white is freed
 			comands("R' D' R D");
 		}
 		move(UP);
 	}//SO NOW I HAVE WHITE ALL ON THE BOTTOM
 	//THE REASON THAT I AM DOING IT THIS WAY IS SO THAT I DON'T HAVE TO COMPARE FOR STATES OF PARODY
-
-
 	//THE NEXT STEP IS GOING TO PUT THE WHITE CUBES BACK WHERE THEY NEED TO BE
 	//
-
-	for (int i = 0; i<4; i++){
+	for (int i = 0; i<5; i++){
 		for (int i = 0; i<4; i++){
-			tempX = xCorner(5);
-			tempY = yCorner(5);
-			tempZ = zCorner(5);
+			tempX = Corner(5,0);
+			tempY = Corner(5,1);
+			tempZ = Corner(5,2);
 		}//Now I need to get the colors that is not white
 		if(tempX == CUBE[UP][CENTER]){
 			tempCorner[0] = tempY;
@@ -207,24 +174,25 @@ void solveFirstLayerCorners(){//I ONLY WANT TO PUT THE CORNERS IN THE CORRECT PO
 			tempCorner[0] = tempX;
 			tempCorner[1]= tempY;
 		}
-
-
 		//temp corner is going to be the colors and orientation I need to put them
 		//So first look for tempCorner[0]'s spot then look for temp[1]'s spot 
+		while(CUBE[UP][8]==CUBE[UP][CENTER] || CUBE[FRONT][2]==CUBE[UP][CENTER] || CUBE[RIGHT][0]==CUBE[UP][CENTER]){
+			move(UP);
+		}
 		if ((CUBE[FRONT][1] == tempCorner[0]) || (CUBE[FRONT][1] == tempCorner[1])){
 			if ((CUBE[RIGHT][1] == tempCorner[0]) || (CUBE[RIGHT][1] == tempCorner[1])){  //IF THESE TWO MATCH THEN I WILL PUT THEM INBETWEEN
-				comands("R' D' R D");
-				rotationI(1);
-				std::cout<<"I DID THE COMANDS MASTER: " << i<<std::endl;
+				while(CUBE[UP][8]!=CUBE[UP][CENTER]){
+					comands("R' D' R D");
+					std::cout<<"SECOND LOOP: " << i<<std::endl;
+				} //THEN IT WILL MOVE ON TO THE NEXT PIECE ON THE BOTTOM
 			}
-		}
+		}	
+		rotation(1);
+		std::cout<<"END: " << i<<std::endl;
 	}
-
-
-
-
-
-
+	while(CUBE[FRONT][1]!=CUBE[FRONT][CENTER])
+		move(UP);
+	
 }
 	
 
@@ -287,12 +255,9 @@ void makeCross(){
 	//to do that I should make a temp of the top side
 	//while(not doesSideHaveCross(UP)){//If the up side isn't solved yet then keep trying
 	//for (int loops = 0; (loops<=200) and (not doesSideHaveCross(UP)) ; loops++){
-
 	while(not doesSideHaveCross(UP)){ //this prevents infinit loops 		I am not sure how many loops it needs to be definite though
 		int targetSide 		= targetEdgeCubeX(); //I would like to make this a tuple when I can figure that out other wise this will have to do
 		int targetPosition 	= targetEdgeCubeY();
-		std::cout<<"PRINT TARGET"<<FACE_NAME[targetSide]<<"\t"<<targetPosition<<std::endl;
-
 		for (int i = 0; (i<4 and (CUBE[targetSide][5]!=CUBE[UP][CENTER])); i++)
 			move(targetSide);			
 		
@@ -318,7 +283,6 @@ void makeCross(){
 			move2(RIGHT);
 		}
 		moveI(UP);
-
 		//so when I target a cube since I want to have the target be up things will behave nicely
 		//I want it so that the pice I target goes into the 5th postion this will be done by rotating the x side
 		//move(x) until target is in 5th
