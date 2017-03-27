@@ -4,17 +4,14 @@
 #include <string>
 #include <algorithm>
 #include <tuple>
+//Hyristics
 
 #define NUM_FACES 6
 #define NUM_STICKERS 9
 
-
-//char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
 char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
+//char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
 //char _CHAR[6][2] = {"G","O","W","R","B","Y"};//MY CUBE
-
-//char FACE_NAME [6][20] = {"A","B","C","D","E","F"};
-						// ?   x	x	?	?	?					
 
 int tempCorner[2] = {0,0};
 char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
@@ -76,20 +73,11 @@ void solveCross();
 void solveFirstLayerCorners();
 
 /*
-
 int xCorner(int position);
 int yCorner(int position);
 int zCorner(int position);*/
 
-int CORNERS[8][3] = {{0,0,0},
-					{0,0,0},
-					{0,0,0},
-					{0,0,0},
-					{0,0,0},
-					{0,0,0},
-					{0,0,0},
-					{0,0,0}};
-
+int CORNERS[8][3];
 void updateCorners();
 int Corner(int position, int xyz);
 
@@ -101,6 +89,24 @@ void secondLayer();
 bool isSecondLayerDone();
 bool doesEdgeHaveYellow();
 
+void leftyAlg();
+void rightyAlg();
+
+//This is to make yellowCross
+
+void yellowCross();
+void theLine();
+void theAngle();
+void theDot();
+void orientateCornersUp();
+
+void rotateCorner();
+
+bool printMode = false;
+
+int NUM_MOVES = 0;
+int NUM_ROTATIONS = 0;
+
 int main(){
 	initilize();
 	comands("L U' D' F B' L2 B2 L' U2 R U2 B R B' F' D B L D' R L F R D' B");
@@ -108,11 +114,100 @@ int main(){
 	solveCross();
 	solveFirstLayerCorners();
 	secondLayer();
-	//rotation2(0);
+	yellowCross();
+	orientateCornersUp();	
+	//So now all I have to do is flip all of the corners in the corect position and then I will be done
+	//I also want to count all of my moves that I have
 
-
+	if (!printMode) print();
+	std::cout<<std::endl<<"NUM MOVES: "<<NUM_MOVES<<std::endl;
+	std::cout<<"NUM_ROTATIONS: "<<NUM_ROTATIONS<<std::endl;
+	std::cout<<"TOTAL MOVES: "<<NUM_MOVES + NUM_ROTATIONS<<std::endl;
 	return 0;
 }
+
+
+
+
+
+void rotateCorner(){
+	comands("R' D' R D");
+}//I could probably do this with the righty algoritm but I just need to change the position of corner I am working with is
+
+
+void orientateCornersUp(){	
+	for(int x = 0; x<4; x++){
+		//I need to find which one is yellow
+		if (Corner(4,0) == CUBE[UP][CENTER])
+			for(int i = 0; i<2; i++)
+				rotateCorner();
+		else if(Corner(4,1) == CUBE[UP][CENTER])
+			for(int i = 0; i<4; i++)
+				rotateCorner();
+		move(UP);//spin the cube for the next one 
+		}
+}
+
+void yellowCross(){
+	//to solve the yellow cross is pretty easy
+	//I need to first see if it is solved already
+	if( CUBE[UP][1]==CUBE[UP][3] &&
+		CUBE[UP][3]==CUBE[UP][5]&&
+		CUBE[UP][5]==CUBE[UP][7]&&
+		CUBE[UP][7]==CUBE[UP][CENTER] ){
+		return;
+	}
+	//then the cube is already yellow cross is already done
+	else if (CUBE[UP][1]!=CUBE[UP][CENTER] &&
+		CUBE[UP][3]!=CUBE[UP][CENTER]&&
+		CUBE[UP][5]!=CUBE[UP][CENTER]&&
+		CUBE[UP][7]!=CUBE[UP][CENTER]){
+		theDot();
+
+	}
+	//then the cube is in the "dot" position
+	if (CUBE[UP][1]==CUBE[UP][7] || CUBE[UP][3]==CUBE[UP][5]){
+		while(CUBE[UP][3]!= CUBE[UP][5]){
+			rotation(1);
+		}
+		theLine();
+	}
+	else{
+		//find what orientation the angle is 
+		while(CUBE[UP][7]!= CUBE[UP][5])
+		{
+			rotation(1);
+		}
+		theAngle();
+	}
+}
+void theDot(){
+	theLine();
+	theAngle();
+}
+void theAngle(){
+	rotation(0);
+	move(BACK);
+
+	rightyAlg();
+
+	rotationI(0);
+	moveI(BACK);
+}
+void theLine(){
+	move(FRONT);
+	rightyAlg();
+	moveI(FRONT);
+}
+
+void rightyAlg(){
+	comands("R U R' U'");
+}
+
+void leftyAlg(){
+	comands("L' U' L U");
+}
+
 void secondLayer(){
 	//the first thing that I need to do is turn the cube around
 	rotation2(0);
@@ -152,14 +247,12 @@ void secondLayer(){
 					rotation(1);
 				}//Do that until it is fine
 				//Then I am either going to go left or go right
-				if(CUBE[UP][7] == CUBE[LEFT][CENTER]){
+				if(CUBE[UP][7] == CUBE[LEFT][CENTER])
 					topPieceLeft();
-					std::cout<<"TOP PIECE LEFT";
-				}
-				else{
+				
+				else
 					topPieceRight();
-					std::cout<<"TOP PIECE RIGHT";
-				}
+				
 		}
 		move(UP);
 		counter++;
@@ -185,19 +278,18 @@ bool isSecondLayerDone(){
 
 void topPieceLeft(){
 	moveI(UP);
-	comands("L' U' L U"); //Lefty Alg
+	leftyAlg();
 	rotationI(1);
-	comands("R U R' U'");	//Righty Alg
+	rightyAlg();
 	rotation(1);
 }
 
 void topPieceRight(){
 	move(UP);
-	comands("R U R' U'");	//Righty Alg
+	rightyAlg();
 	rotation(1);
-	comands("L' U' L U"); //Lefty Alg
+	leftyAlg();
 	rotationI(1);
-
 }
 
 int Corner(int position, int xyz){ //this update the corners
@@ -211,7 +303,6 @@ int Corner(int position, int xyz){ //this update the corners
 	CORNERS [7][0] = CUBE[RIGHT][8]; 	CORNERS [7][1] = CUBE[BACK][6]; 	CORNERS [7][2] = CUBE[DOWN][8];
 	return CORNERS[position][xyz];
 }
-
 
 void solveFirstLayerCorners(){//I ONLY WANT TO PUT THE CORNERS IN THE CORRECT POSITIONS I DON'T CARE ABOUT ORIENTATION
 	//when i solve for the coners I am looking at [up][8] 
@@ -435,9 +526,10 @@ void move(int SIDE){//Clockwise Turn
 	CUBE[ATMV[SIDE][3]][ATMV[SIDE][13]] = temp;
 	CUBE[ATMV[SIDE][3]][ATMV[SIDE][14]] = temp0;
 	CUBE[ATMV[SIDE][3]][ATMV[SIDE][15]] = temp1;
-	std::cout<<std::endl<<FACE_NAME[SIDE]<<std::endl;
+	std::cout<<std::endl<<FACE_NAME[SIDE];
 	rotateSingleFace(SIDE);
-	print();
+	if (printMode) print();
+	NUM_MOVES++;
 }
 
 void rotationI(int SIDE){
@@ -466,8 +558,8 @@ void rotation(std::string _str){//These rotation functions are now what I want b
 		rotationY();
 	else if(_str=="z")
 		rotationZ();
-	else
-		std::cout<<"ROTATION CALLED BUT NOT APPLIED"<<std::endl;
+	if (printMode) print();
+	NUM_ROTATIONS++;
 }
 void rotation(int _int){
 	if(_int == 0)
@@ -476,8 +568,8 @@ void rotation(int _int){
 		rotationY();
 	else if(_int==2)
 		rotationZ();
-	else
-		std::cout<<"ROTATION CALLED BUT NOT APPLIED"<<std::endl;
+	if (printMode) print();
+	NUM_ROTATIONS++;
 }
 
 void rotateSingleFaceI(int SIDE){
@@ -489,7 +581,7 @@ void rotateSingleFace2(int SIDE){
 	rotateSingleFace(SIDE);
 }
 
-void rotationX(){ //GOOD
+void rotationX(){
 	int temp[NUM_STICKERS];
 	for(int i = 0; i<NUM_STICKERS; i++){
 		temp[i]=CUBE[FRONT][i];
@@ -502,10 +594,10 @@ void rotationX(){ //GOOD
 	rotateSingleFace2(DOWN);
 	rotateSingleFace(RIGHT);
 	rotateSingleFaceI(OPPISITESIDE[RIGHT]);//TO ROTATE IT CLOCKWISE
-	std::cout<<std::endl<<"Rotation X"<<std::endl;
-	print();
+	std::cout<<std::endl<<"Rotation X";
+	//print();
 }
-void rotationY(){//GOOD
+void rotationY(){
 	int temp[NUM_STICKERS];
 	for(int i = 0; i<NUM_STICKERS; i++){
 		temp[i]=CUBE[FRONT][i];
@@ -516,10 +608,10 @@ void rotationY(){//GOOD
 	}
 	rotateSingleFace(UP);
 	rotateSingleFaceI(OPPISITESIDE[UP]);//TO ROTATE IT CLOCKWISE
-	std::cout<<std::endl<<"Rotation Y"<<std::endl;
-	print();
+	std::cout<<std::endl<<"Rotation Y";
+	//print();
 }
-void rotationZ(){//GOOD
+void rotationZ(){
 	int temp[NUM_STICKERS];
 	for(int i = 0; i<NUM_STICKERS; i++){
 		temp[i]=CUBE[UP][i];
@@ -534,8 +626,8 @@ void rotationZ(){//GOOD
 	rotateSingleFace(RIGHT);
 	rotateSingleFace(FRONT); //This is the original side I am rotating
 	rotateSingleFaceI(OPPISITESIDE[FRONT]);
-	std::cout<<std::endl<<"Rotation Z"<<std::endl;
-	print();
+	std::cout<<std::endl<<"Rotation Z";
+	//print();
 }
 
 void rotateSingleFace(int SIDE){ //I am seperating this out because rotating the cube will need this
@@ -595,20 +687,17 @@ void initilize(){
 			CUBE[x][y] = x;
 }
 
-
-
-/*STAR/int CUBE[NUM_FACES][NUM_STICKERS] =  {{0,1,2,3,4,5,6,7,8},
+/*int CUBE[NUM_FACES][NUM_STICKERS] =  {{0,1,2,3,4,5,6,7,8},
 									{9,10,11,12,13,14,15,16,17},
 									{18,19,20,21,22,23,24,25,26},
 									{27,28,29,30,31,32,33,34,35},
 									{36,37,38,39,40,41,42,43,44},
 									{45,46,47,48,49,50,51,52,53}};
-//PUT THIS ONE IN THE HEADER/**/
+*/
 
-/*THIS GOES IN THE MAIN STAR/
+/*//THIS GOES IN THE MAIN STAR/
 print();
-rotationX();/**/
-/*PUT STAR HERE*/
+rotationX();*/
 
 /* THIS ONE IS FOR NUMBERS PUT STAR/
 void print(){
@@ -634,7 +723,7 @@ void print(){
 		std::cout<<"\t\t\t"<<CUBE[DOWN][0] << " "<< CUBE[DOWN][1] << " "<< CUBE[DOWN][2]<<std::endl;
 		std::cout<<"\t\t\t"<<CUBE[DOWN][3] << " "<< CUBE[DOWN][4] << " "<< CUBE[DOWN][5]<<std::endl;
 		std::cout<<"\t\t\t"<<CUBE[DOWN][6] << " "<< CUBE[DOWN][7] << " "<< CUBE[DOWN][8]<<std::endl;
-}/**/
+}*/
 
 
 /*void updateCorners(){
@@ -647,5 +736,7 @@ void print(){
 				{CUBE[RIGHT][2],	CUBE[BACK][0],		CUBE[UP][2]},
 				{CUBE[RIGHT][8],	CUBE[BACK][6],		CUBE[DOWN][0]}};
 }*/ //this keeps on saying unexpected identifyer I think it is beacuse cube is not initilized yet
+
+
 
 
