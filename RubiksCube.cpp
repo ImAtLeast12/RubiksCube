@@ -9,9 +9,9 @@
 #define NUM_FACES 6
 #define NUM_STICKERS 9
 
-char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
+//char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
 //char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
-//char _CHAR[6][2] = {"G","O","W","R","B","Y"};//MY CUBE
+char _CHAR[6][2] = {"G","O","W","R","B","Y"};//MY CUBE
 
 int tempCorner[2] = {0,0};
 char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
@@ -34,6 +34,8 @@ int CUBE [NUM_FACES][NUM_STICKERS];
 
 char VALID_TWO_CHAR_COMMANDS[12][3] = {"Li","L2","Bi","B2","Ui","U2","Fi","F2","Ri","R2","Di","D2"};
 char VALID_ONE_CHAR_COMMANDS[6][2] = {"L","B","U","F","R","D"};
+
+
 
 //METHODS
 void initilize();		//INITILIZES THE CUBE
@@ -106,29 +108,88 @@ bool printMode = false;
 
 int NUM_MOVES = 0;
 int NUM_ROTATIONS = 0;
+void switchCorners();
+void whichSwitch();
+
 
 int main(){
 	initilize();
-	comands("L U' D' F B' L2 B2 L' U2 R U2 B R B' F' D B L D' R L F R D' B");
+	comands("L U' D' F B' L2 B2 L' U2 R U2 B R B' F' D B L D' R L F R D' B"); //this just generates a random cube
 	makeCross();
 	solveCross();
 	solveFirstLayerCorners();
 	secondLayer();
 	yellowCross();
-	orientateCornersUp();	
-	//So now all I have to do is flip all of the corners in the corect position and then I will be done
-	//I also want to count all of my moves that I have
+	whichSwitch();
 
-	if (!printMode) print();
+	
 	std::cout<<std::endl<<"NUM MOVES: "<<NUM_MOVES<<std::endl;
 	std::cout<<"NUM_ROTATIONS: "<<NUM_ROTATIONS<<std::endl;
 	std::cout<<"TOTAL MOVES: "<<NUM_MOVES + NUM_ROTATIONS<<std::endl;
+	if (!printMode) print();
 	return 0;
 }
 
+void switchCorners(){
+	comands("R' D' R2 D2 R' D R' D' R D");
+	move(UP);
+	comands("R' D' R D R' D' R D");	
+	comands("R' D' R D R' D' R D");	
+	moveI(UP);
+}
 
-
-
+void whichSwitch(){
+	//This one i am going to have to decide which switch to do
+	//First is the cube solved already
+	orientateCornersUp();
+	if (CUBE[FRONT][0]==CUBE[FRONT][2] &&
+		CUBE[RIGHT][0]==CUBE[RIGHT][2] &&
+		CUBE[BACK][0]==CUBE[BACK][2] &&
+		CUBE[LEFT][0]==CUBE[LEFT][2])
+	{
+		return;
+	}
+	else if (CUBE[FRONT][0]==CUBE[BACK][2] &&
+			CUBE[RIGHT][0]==CUBE[LEFT][2] &&
+			CUBE[BACK][0]==CUBE[FRONT][2] &&
+			CUBE[LEFT][0]==CUBE[RIGHT][2])
+	{
+		switchCorners();
+		rotation2(1);
+		switchCorners();
+		return;
+	}
+	else{
+		for(int i = 0; i<4; i++){
+			//these ones I will have to check 4 times
+			if(CUBE[FRONT][0]==CUBE[RIGHT][2] &&
+				CUBE[RIGHT][0]==CUBE[LEFT][2] &&
+				CUBE[BACK][0]==CUBE[BACK][2] &&
+				CUBE[LEFT][0]==CUBE[FRONT][2])
+			{
+				//rotation(1);
+				switchCorners();
+				rotationI(1);
+				move(UP);
+				switchCorners();
+				return;
+			}
+			else if(CUBE[FRONT][0]==CUBE[BACK][2]&&
+					CUBE[RIGHT][0]==CUBE[RIGHT][2]&&
+					CUBE[BACK][0]==CUBE[LEFT][2]&&
+					CUBE[LEFT][0]==CUBE[FRONT][2])
+			{
+				move(UP);
+				switchCorners();
+				moveI(UP);
+				switchCorners();
+				return;
+			}
+			move(UP);
+		}
+		return;
+	}
+}
 
 void rotateCorner(){
 	comands("R' D' R D");
