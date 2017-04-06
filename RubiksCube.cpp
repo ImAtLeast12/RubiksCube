@@ -9,15 +9,15 @@
 #define NUM_FACES 6
 #define NUM_STICKERS 9
 
-//char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
+char _CHAR[6][2] = {"O","B","W","G","R","Y"};  	//https://ruwix.com/puzzle-scramble-generator/?type=rubiks-cube
 //char _CHAR[6][2] = {"G","R","Y","O","B","W"};	//https://rubiks-cube-solver.com
-char _CHAR[6][2] = {"G","O","W","R","B","Y"};//MY CUBE
+//char _CHAR[6][2] = {"G","O","W","R","B","Y"};//MY CUBE
 
 int tempCorner[2] = {0,0};
 char FACE_NAME [6][20] = {"LEFT","BACK","UP","FRONT","RIGHT","DOWN"};
 
-int OPPISITESIDE[6] = {4,3,5,1,0,2};
 enum FACES{LEFT, BACK, UP, FRONT, RIGHT, DOWN};
+int OPPISITESIDE[6] = {RIGHT,FRONT,DOWN,BACK,LEFT,UP};
 enum COLORS{GREEN, ORANGE, WHITE, RED, BLUE, YELLOW};
 enum CUBELETS{	TOP_LEFT, 	 TOP_CENTER, 	TOP_RIGHT,
 				CENTER_LEFT, CENTER, 		CENTER_RIGHT,
@@ -73,6 +73,7 @@ bool checkCross(int SIDE);
 void makeCross();
 void solveCross();
 void solveFirstLayerCorners();
+void makeDaisy();
 
 /*
 int xCorner(int position);
@@ -104,30 +105,62 @@ void orientateCornersUp();
 
 void rotateCorner();
 
+void edgeFlip();
+
 bool printMode = false;
 
 int NUM_MOVES = 0;
 int NUM_ROTATIONS = 0;
 void switchCorners();
 void whichSwitch();
+void positionEdges();
+bool completeEdgeSolved();
+void M();
+bool isCornerEqualToPiece(int corner,int SIDE, int position);
+bool edgesInverted();
+bool edgesAskew();
 
+void M(){
+	rotation(0);
+	comands("L R'");
+}
 
 int main(){
 	initilize();
-	comands("L U' D' F B' L2 B2 L' U2 R U2 B R B' F' D B L D' R L F R D' B"); //this just generates a random cube
+	comands("R D2 F U L2 U B' U2 L U' F L2 R' B' F2 D R D2 F B' U' F U2 F2 B"); //this just generates a random cube
 	makeCross();
 	solveCross();
+	makeDaisy();
 	solveFirstLayerCorners();
 	secondLayer();
 	yellowCross();
 	whichSwitch();
+	positionEdges();
 
-	
+
+
 	std::cout<<std::endl<<"NUM MOVES: "<<NUM_MOVES<<std::endl;
 	std::cout<<"NUM_ROTATIONS: "<<NUM_ROTATIONS<<std::endl;
 	std::cout<<"TOTAL MOVES: "<<NUM_MOVES + NUM_ROTATIONS<<std::endl;
 	if (!printMode) print();
 	return 0;
+}
+
+
+
+bool cube_flipFloped(){
+	for(int side = 0; side<NUM_FACES; side++){
+		if(side == UP || side == DOWN){
+
+		}
+		else if ( CUBE[side][1] == CUBE[OPPISITESIDE[side]][0] &&
+				CUBE[side][1] == CUBE[OPPISITESIDE[side]][2]){
+			//then I need to do the flip thing
+		}
+		else
+			return false;
+	}
+	return true;
 }
 
 void switchCorners(){
@@ -138,58 +171,149 @@ void switchCorners(){
 	moveI(UP);
 }
 
+bool edgesAskew(){
+	for(int i = 0; i<3; i++){
+		if (CUBE[FRONT][0] == CUBE[RIGHT][1] && CUBE[FRONT][2] == CUBE[RIGHT][1]) 
+			if (CUBE[BACK][0] == CUBE[LEFT][1] && CUBE[BACK][2] == CUBE[LEFT][1]) 
+				return true;
+		move(UP);
+	}
+	return false;
+
+}
+
+bool edgesInverted(){
+	for(int i = 0; i<3; i++){
+			if(CUBE[FRONT][1] == CUBE[BACK][0] && CUBE[RIGHT][1]==CUBE[LEFT][0])
+				return true;
+			move(UP);
+		}
+		return false;
+}
+bool justEdgesSolved(){
+	if (CUBE[FRONT][0] == CUBE[FRONT][1] && CUBE[FRONT][1]==CUBE[FRONT][2])
+		if (CUBE[RIGHT][0] == CUBE[RIGHT][1] && CUBE[RIGHT][1]==CUBE[RIGHT][2])
+			if (CUBE[BACK][0] == CUBE[BACK][1] && CUBE[BACK][1]==CUBE[BACK][2])
+				if (CUBE[LEFT][0] == CUBE[LEFT][1] && CUBE[LEFT][1]==CUBE[LEFT][2])
+					return true;
+	return false;
+}
+
+void positionEdges(){
+	//I am going to move the up layer until front upcenter == front center
+
+	//case 2
+
+	/*M2 D2 M2 U
+	M2 D2 M2 U'
+
+	spin the cube
+
+	M2 D2 M2 U
+	M2 D2 M2 U'
+	*/
+
+	if (edgesAskew()){
+		print();
+		edgeFlip();
+		while(CUBE[FRONT][0]!= CUBE[FRONT][1] && CUBE[FRONT][2]!= CUBE[FRONT][1])
+			move(UP);
+		while(!justEdgesSolved()) //case 4 and case 1
+			edgeFlip();
+		std::cout<<"\n\ncase askew";
+		return;
+	}
+	else if(edgesInverted()){ //case 3
+		print();
+		edgeFlip();
+		while(CUBE[FRONT][0]!= CUBE[FRONT][1] && CUBE[FRONT][2]!= CUBE[FRONT][1])
+			move(UP);
+		while(!justEdgesSolved()) //case 4 and case 1
+			edgeFlip();
+		std::cout<<"\n\ncase INVERTED";
+		return;
+	}
+	else{
+		print();
+		while(CUBE[FRONT][0]!= CUBE[FRONT][1] && CUBE[FRONT][2]!= CUBE[FRONT][1])	//same as in the bottom of edges askew
+			move(UP);
+		while(!justEdgesSolved()) //case 4 and case 1
+			edgeFlip();
+		std::cout<<"\n\nthree in a row";
+		return;
+	}
+}
+
+void edgeFlip(){
+	rightyAlg();
+	leftyAlg();
+	for(int i = 0; i<5;i++){
+		rightyAlg();
+	}
+	for(int i = 0; i<5; i++){
+		leftyAlg();
+	}
+}
+
+
+bool completeEdgeSolved(){
+	for (int x = 0; x<4; x++){
+		for(int y = 0; y<2; y++){
+			if (CUBE[FRONT][0+y]!=CUBE[FRONT][1+y]){
+				return false;
+			}
+		}
+	}
+	return true;
+}
 void whichSwitch(){
 	//This one i am going to have to decide which switch to do
 	//First is the cube solved already
 	orientateCornersUp();
-	if (CUBE[FRONT][0]==CUBE[FRONT][2] &&
-		CUBE[RIGHT][0]==CUBE[RIGHT][2] &&
-		CUBE[BACK][0]==CUBE[BACK][2] &&
-		CUBE[LEFT][0]==CUBE[LEFT][2])
-	{
-		return;
-	}
-	else if (CUBE[FRONT][0]==CUBE[BACK][2] &&
-			CUBE[RIGHT][0]==CUBE[LEFT][2] &&
-			CUBE[BACK][0]==CUBE[FRONT][2] &&
-			CUBE[LEFT][0]==CUBE[RIGHT][2])
-	{
-		switchCorners();
-		rotation2(1);
-		switchCorners();
-		return;
-	}
-	else{
-		for(int i = 0; i<4; i++){
-			//these ones I will have to check 4 times
-			if(CUBE[FRONT][0]==CUBE[RIGHT][2] &&
+	for(int i = 0; i<4; i++){
+		if (CUBE[FRONT][0]==CUBE[FRONT][2] &&
+			CUBE[RIGHT][0]==CUBE[RIGHT][2] &&
+			CUBE[BACK][0]==CUBE[BACK][2] &&
+			CUBE[LEFT][0]==CUBE[LEFT][2]){
+			std::cout<<"case0\n\n\n\n";
+			return;
+		}
+		else if (CUBE[FRONT][0]==CUBE[BACK][2] &&
+				CUBE[RIGHT][0]==CUBE[LEFT][2] &&
+				CUBE[BACK][0]==CUBE[FRONT][2] &&
+				CUBE[LEFT][0]==CUBE[RIGHT][2]){//CASE 2
+			std::cout<<"\n\n\n";
+			std::cout<<"case1\n\n\n\n";
+			switchCorners();
+			move2(UP);
+			switchCorners();
+			return;
+		}
+		else if(CUBE[FRONT][0]==CUBE[RIGHT][2] &&
 				CUBE[RIGHT][0]==CUBE[LEFT][2] &&
 				CUBE[BACK][0]==CUBE[BACK][2] &&
-				CUBE[LEFT][0]==CUBE[FRONT][2])
-			{
-				//rotation(1);
+				CUBE[LEFT][0]==CUBE[FRONT][2]){//So this is case 1
 				switchCorners();
-				rotationI(1);
 				move(UP);
 				switchCorners();
+				std::cout<<"case2\n\n\n\n";
 				return;
 			}
-			else if(CUBE[FRONT][0]==CUBE[BACK][2]&&
-					CUBE[RIGHT][0]==CUBE[RIGHT][2]&&
-					CUBE[BACK][0]==CUBE[LEFT][2]&&
-					CUBE[LEFT][0]==CUBE[FRONT][2])
-			{
+		else if(CUBE[FRONT][0]==CUBE[BACK][2]&&
+				CUBE[RIGHT][0]==CUBE[RIGHT][2]&&
+				CUBE[BACK][0]==CUBE[LEFT][2]&&
+				CUBE[LEFT][0]==CUBE[FRONT][2]){
 				move(UP);
 				switchCorners();
 				moveI(UP);
 				switchCorners();
+				std::cout<<"case3\n\n\n\n";
 				return;
-			}
-			move(UP);
 		}
-		return;
+		move(UP);
 	}
 }
+
 
 void rotateCorner(){
 	comands("R' D' R D");
@@ -224,22 +348,22 @@ void yellowCross(){
 		CUBE[UP][5]!=CUBE[UP][CENTER]&&
 		CUBE[UP][7]!=CUBE[UP][CENTER]){
 		theDot();
-
+		return;
 	}
 	//then the cube is in the "dot" position
+
 	if (CUBE[UP][1]==CUBE[UP][7] || CUBE[UP][3]==CUBE[UP][5]){
-		while(CUBE[UP][3]!= CUBE[UP][5]){
+		if (CUBE[UP][3]!=CUBE[UP][5]){
 			rotation(1);
 		}
 		theLine();
+		return;
 	}
 	else{
-		//find what orientation the angle is 
 		while(CUBE[UP][7]!= CUBE[UP][5])
-		{
 			rotation(1);
-		}
 		theAngle();
+		return;
 	}
 }
 void theDot(){
@@ -247,12 +371,10 @@ void theDot(){
 	theAngle();
 }
 void theAngle(){
-	rotation(0);
+	rotation("Z");
 	move(BACK);
-
 	rightyAlg();
-
-	rotationI(0);
+	rotationI("Z");
 	moveI(BACK);
 }
 void theLine(){
@@ -293,7 +415,7 @@ void secondLayer(){
 		if (counter > 5){
 			//then I need to swap an edge with another to free it up
 			//Just make sure that it dosn't free a cubelet that is in the correct spot already
-			while(CUBE[FRONT][5]==CUBE[FRONT][CENTER]){
+			while(CUBE[FRONT][5]==CUBE[FRONT][CENTER]){ 		//THIS IS A MAJOR PROBLEM THAT I WILL HAVE TO LOOK INTO LATER
 				rotation(1);
 			}
 			topPieceRight();
@@ -365,13 +487,47 @@ int Corner(int position, int xyz){ //this update the corners
 	return CORNERS[position][xyz];
 }
 
-void solveFirstLayerCorners(){//I ONLY WANT TO PUT THE CORNERS IN THE CORRECT POSITIONS I DON'T CARE ABOUT ORIENTATION
-	//when i solve for the coners I am looking at [up][8] 
-	//if the up 8 coner has white then I will look at down 2
-	//if down 2 has a colror that has white then I will rotate down
-	//if the up 8 coner has white then I will look at down 2
-	//repeat till not true
-	int tempX,tempY, tempZ;
+void solveFirstLayerCorners(){
+	for(int x = 0; x<5; x++){
+		for(int y = 0; y<5; y++){
+			if (isCornerEqualToPiece(5,FRONT,1) && 
+				isCornerEqualToPiece(5,RIGHT,1) && 
+				isCornerEqualToPiece(5,UP,CENTER)){
+				rotateCorner();
+				while(CUBE[UP][CENTER]!=CUBE[UP][8]){
+					rotateCorner();
+					rotateCorner();
+				}
+				rotation(1);
+			}
+			move(DOWN);
+		}
+	}
+}
+
+bool isCornerEqualToPiece(int corner,int SIDE, int position){
+	if (CUBE[SIDE][position]==Corner(corner,0))
+		return true;
+	if (CUBE[SIDE][position]==Corner(corner,1))
+		return true;
+	if (CUBE[SIDE][position]==Corner(corner,2))
+		return true;
+	return false;
+}
+		
+
+
+
+
+
+
+
+
+
+
+
+
+void makeDaisy(){
 	for (int i = 0; i<4; i++){
 		if (Corner(4,0) == CUBE[UP][CENTER] || Corner(4,1) == CUBE[UP][CENTER] || Corner(4,2) == CUBE[UP][CENTER]){ //if any of these cublets are white
 			//then check if down 2 has a white piece
@@ -381,44 +537,7 @@ void solveFirstLayerCorners(){//I ONLY WANT TO PUT THE CORNERS IN THE CORRECT PO
 			comands("R' D' R D");
 		}
 		move(UP);
-	}//SO NOW I HAVE WHITE ALL ON THE BOTTOM
-	//THE REASON THAT I AM DOING IT THIS WAY IS SO THAT I DON'T HAVE TO COMPARE FOR STATES OF PARODY
-	//THE NEXT STEP IS GOING TO PUT THE WHITE CUBES BACK WHERE THEY NEED TO BE
-	//
-	for (int i = 0; i<5; i++){
-		for (int i = 0; i<4; i++){
-			tempX = Corner(5,0);
-			tempY = Corner(5,1);
-			tempZ = Corner(5,2);
-		}//Now I need to get the colors that is not white
-		if(tempX == CUBE[UP][CENTER]){
-			tempCorner[0] = tempY;
-			tempCorner[1] = tempZ;
-		}
-		else if (tempY==CUBE[UP][CENTER]){
-			tempCorner[0]=tempX;
-			tempCorner[1]=tempZ;
-		}
-		else{
-			tempCorner[0] = tempX;
-			tempCorner[1]= tempY;
-		}
-		//temp corner is going to be the colors and orientation I need to put them
-		//So first look for tempCorner[0]'s spot then look for temp[1]'s spot 
-		while(CUBE[UP][8]==CUBE[UP][CENTER] || CUBE[FRONT][2]==CUBE[UP][CENTER] || CUBE[RIGHT][0]==CUBE[UP][CENTER]){
-			move(UP);
-		}
-		if ((CUBE[FRONT][1] == tempCorner[0]) || (CUBE[FRONT][1] == tempCorner[1])){
-			if ((CUBE[RIGHT][1] == tempCorner[0]) || (CUBE[RIGHT][1] == tempCorner[1])){  //IF THESE TWO MATCH THEN I WILL PUT THEM INBETWEEN
-				while(CUBE[UP][8]!=CUBE[UP][CENTER]){
-					comands("R' D' R D");
-				} //THEN IT WILL MOVE ON TO THE NEXT PIECE ON THE BOTTOM
-			}
-		}	
-		rotation(1);
 	}
-	while(CUBE[FRONT][1]!=CUBE[FRONT][CENTER])
-		move(UP);
 }
 
 void solveCross(){
@@ -747,57 +866,3 @@ void initilize(){
 		for (int y = 0; y<NUM_STICKERS; y++)
 			CUBE[x][y] = x;
 }
-
-/*int CUBE[NUM_FACES][NUM_STICKERS] =  {{0,1,2,3,4,5,6,7,8},
-									{9,10,11,12,13,14,15,16,17},
-									{18,19,20,21,22,23,24,25,26},
-									{27,28,29,30,31,32,33,34,35},
-									{36,37,38,39,40,41,42,43,44},
-									{45,46,47,48,49,50,51,52,53}};
-*/
-
-/*//THIS GOES IN THE MAIN STAR/
-print();
-rotationX();*/
-
-/* THIS ONE IS FOR NUMBERS PUT STAR/
-void print(){
-		std::cout<<"\t\t\t"<<CUBE[UP][0] << " "<< CUBE[UP][1]     << " "<< CUBE[UP][2]<<std::endl;
-		std::cout<<"\t\t\t"<<CUBE[UP][3] << " "<< CUBE[UP][4] 	<< " "<< CUBE[UP][5]<<std::endl;
-		std::cout<<"\t\t\t"<<CUBE[UP][6] << " "<< CUBE[UP][7] 	<< " "<< CUBE[UP][8]<<std::endl<<std::endl;
-
-		std::cout<<CUBE[LEFT][0] 	<< " "<< CUBE[LEFT][1] 	<< " "<< CUBE[LEFT][2] <<"\t";
-		std::cout<<CUBE[FRONT][0] 	<< " "<< CUBE[FRONT][1] 	<< " "<< CUBE[FRONT][2] <<"\t";
-		std::cout<<CUBE[RIGHT][0] 	<< " "<< CUBE[RIGHT][1] 	<< " "<< CUBE[RIGHT][2] <<"\t";
-		std::cout<<"   "<<CUBE[BACK][0] 	<< " "<< CUBE[BACK][1] 	<< " "<< CUBE[BACK][2]<<std::endl;
-
-		std::cout<<CUBE[LEFT][3] 	<< " "<< CUBE[LEFT][4] 	<< " "<< CUBE[LEFT][5] <<"\t";
-		std::cout<<CUBE[FRONT][3] 	<< " "<< CUBE[FRONT][4] 	<< " "<< CUBE[FRONT][5] <<"\t";
-		std::cout<<CUBE[RIGHT][3] 	<< " "<< CUBE[RIGHT][4] 	<< " "<< CUBE[RIGHT][5] <<"\t";
-		std::cout<<CUBE[BACK][3] 	<< " "<< CUBE[BACK][4] 	<< " "<< CUBE[BACK][5]<<"\t"<<std::endl;
-
-		std::cout<<CUBE[LEFT][6] 	<< " "<< CUBE[LEFT][7] 	<< " "<< CUBE[LEFT][8] <<"\t";
-		std::cout<<CUBE[FRONT][6] 	<< " "<< CUBE[FRONT][7] 	<< " "<< CUBE[FRONT][8] <<"\t";
-		std::cout<<CUBE[RIGHT][6] 	<< " "<< CUBE[RIGHT][7] 	<< " "<< CUBE[RIGHT][8] <<"\t";
-		std::cout<<CUBE[BACK][6] 	<< " "<< CUBE[BACK][7] 	<< " "<< CUBE[BACK][8]<<std::endl<<std::endl;
-
-		std::cout<<"\t\t\t"<<CUBE[DOWN][0] << " "<< CUBE[DOWN][1] << " "<< CUBE[DOWN][2]<<std::endl;
-		std::cout<<"\t\t\t"<<CUBE[DOWN][3] << " "<< CUBE[DOWN][4] << " "<< CUBE[DOWN][5]<<std::endl;
-		std::cout<<"\t\t\t"<<CUBE[DOWN][6] << " "<< CUBE[DOWN][7] << " "<< CUBE[DOWN][8]<<std::endl;
-}*/
-
-
-/*void updateCorners(){
-	CORNERS = {{CUBE[LEFT][2],		CUBE[FRONT][0],		CUBE[UP][6]},
-				{CUBE[LEFT][8],		CUBE[FRONT][6],		CUBE[DOWN][0]},
-				{CUBE[LEFT][0],		CUBE[BACK][2],		CUBE[UP][0]},
-				{CUBE[LEFT][6],		CUBE[BACK][8],		CUBE[DOWN][6]},
-				{CUBE[RIGHT][0],	CUBE[FRONT][2],		CUBE[UP][8]},
-				{CUBE[RIGHT][6],	CUBE[FRONT][8],		CUBE[DOWN][2]},
-				{CUBE[RIGHT][2],	CUBE[BACK][0],		CUBE[UP][2]},
-				{CUBE[RIGHT][8],	CUBE[BACK][6],		CUBE[DOWN][0]}};
-}*/ //this keeps on saying unexpected identifyer I think it is beacuse cube is not initilized yet
-
-
-
-
